@@ -16,6 +16,7 @@ export default function Navbar() {
           <li><Link href="/predictions" onClick={() => setIsMenuOpen(false)}>Predictions</Link></li>
           <li><Link href="/blog" onClick={() => setIsMenuOpen(false)}>News & Blogs</Link></li>
           <li><Link href="/fixtures" onClick={() => setIsMenuOpen(false)}>Fixtures</Link></li>
+          <li><Link href="/about" onClick={() => setIsMenuOpen(false)}>About Us</Link></li>
         </ul>
         
         <Link href="/predictions" className="nav-cta-mobile" onClick={() => setIsMenuOpen(false)}>
