@@ -1,100 +1,142 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Head from 'next/head';
 import Navbar from '../components/Navbar';
 import AdComponent from '../components/AdComponent';
 
 export default function AboutPage() {
+  useEffect(() => {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), 80);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.observe').forEach(el => obs.observe(el));
+
+    document.querySelectorAll('.bento-card').forEach((el, i) => {
+      el.style.transitionDelay = (i % 4) * 0.08 + 's';
+    });
+
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <div className="dash-layout">
+    <>
       <Head>
         <title>About Us | Cricket Decoded</title>
       </Head>
 
       <Navbar />
 
-      <div className="dash-inner">
-        {/* HERO SECTION FOR ABOUT */}
-        <section className="hero" style={{minHeight: "auto", padding: "4rem 2rem 2rem", position: "relative", overflow: "hidden"}}>
-            <div className="hero-content" style={{maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4rem'}}>
-                <div style={{flex: '1 1 500px', zIndex: 10, textAlign: 'left'}}>
-                    <div className="live-badge" style={{marginBottom: "1.5rem", display: "inline-flex"}}>
-                        <span className="live-dot"></span> THE LR COMPANY
-                    </div>
-                    
-                    <h1 className="hero-title" style={{fontSize: "clamp(3rem, 6vw, 4.5rem)", marginBottom: "1rem", textAlign: "left" }}>
-                        About <br/>
-                        <em>CricketDecoded.</em>
-                    </h1>
-                    <p className="hero-sub" style={{maxWidth: '600px', fontSize: '1.1rem', lineHeight: '1.6', textAlign: 'left', marginLeft: 0}}>
-                        Welcome to <strong>CricketDecoded</strong>, your ultimate destination for cricket match predictions, in-depth analysis, and real-time insights.
-                    </p>
-                </div>
-                
-                <div style={{flex: '1 1 400px', display: 'flex', justifyContent: 'center', position: 'relative'}}>
-                    <div style={{
-                        position: 'absolute',
-                        width: '350px',
-                        height: '350px',
-                        background: 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, rgba(16,185,129,0) 70%)',
-                        zIndex: 0,
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        filter: 'blur(40px)'
-                    }}></div>
-                    <img src="/lrimg.png" alt="Lakshit Raina" style={{maxWidth: '100%', height: 'auto', maxHeight: '450px', zIndex: 1, position: 'relative', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))', objectFit: 'contain'}} />
-                </div>
+      <main>
+        {/* HERO SECTION (Exactly like Home Page) */}
+        <section className="hero">
+          <div className="hero-content">
+            <div className="live-pill">
+              <span className="live-dot" style={{background: 'var(--emerald)'}}></span> 
+              THE LR COMPANY
             </div>
+
+            <h1 className="hero-title" style={{fontSize: "clamp(3.5rem, 6vw, 5rem)"}}>
+              About.<br />
+              <em>CricketDecoded.</em>
+            </h1>
+
+            <p className="hero-sub" style={{ marginBottom: "1rem" }}>
+              Welcome to <strong>CricketDecoded</strong>, your ultimate destination for cricket match predictions, in-depth analysis, and real-time insights.
+            </p>
+            <p className="hero-sub" style={{ marginBottom: "2rem" }}>
+              We combine data-driven strategies, team analysis, pitch conditions, and player performance to provide accurate and reliable match predictions.
+            </p>
+          </div>
+
+          <div className="hero-visual">
+            <img src="/lrimg.png" className="hero-main-img" alt="Lakshit Raina" />
+          </div>
         </section>
 
-        {/* CONTENT SECION WITH BENTO CARDS */}
-        <section style={{maxWidth: '1000px', margin: '0 auto', padding: '2rem'}}>
-            <div className="glass-panel" style={{padding: '3rem', marginBottom: '2rem'}}>
-                <h2 style={{fontSize: '2rem', marginBottom: '1.5rem', color: '#10b981'}}>Our Mission</h2>
-                <p style={{lineHeight: '1.8', fontSize: '1.1rem', color: '#cbd5e1', marginBottom: '1.5rem'}}>
-                    At CricketDecoded, we combine data-driven strategies, team analysis, pitch conditions, and player performance to provide accurate and reliable match predictions. Our platform is designed for cricket enthusiasts who want quick insights, winning probabilities, and expert-level breakdowns before every match.
-                </p>
-                
-                <h3 style={{fontSize: '1.4rem', marginBottom: '1rem', color: 'white'}}>We focus on delivering:</h3>
-                <ul style={{listStyle: 'none', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem'}}>
-                    <li style={{background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.1)'}}>🎯 Match Predictions & Win Probability</li>
-                    <li style={{background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.1)'}}>🪙 Toss & Pitch Analysis</li>
-                    <li style={{background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.1)'}}>🏏 Team Insights & Key Player Stats</li>
-                    <li style={{background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.1)'}}>📰 Latest Cricket News & Updates</li>
-                </ul>
-                <p style={{lineHeight: '1.8', fontSize: '1.1rem', color: '#cbd5e1', marginTop: '1.5rem'}}>
-                    Our goal is to create a fast, user-friendly, and information-rich platform that helps users stay ahead in every game.
-                </p>
-            </div>
+        {/* CONTENT SECTION (Light Mode like Home Page) */}
+        <section className="features-section" style={{ padding: "5rem 2rem", background: "#f8fafc" }}>
+          <div className="section-header">
+            <span className="section-tag">Value Proposition</span>
+            <h2>We Focus On <br/><em>Delivering.</em></h2>
+            <p style={{marginTop: '1rem', color: 'var(--slate-500)', fontSize: '1.1rem', maxWidth: '600px', margin: '1rem auto 0'}}>Our goal is to create a fast, user-friendly, and information-rich platform that helps users stay ahead in every game.</p>
+          </div>
 
-            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '4rem'}}>
-                <div className="glass-panel" style={{padding: '2rem'}}>
-                    <h3 style={{fontSize: '1.5rem', marginBottom: '1rem', color: '#3b82f6'}}>Our Vision</h3>
-                    <p style={{color: '#94a3b8', lineHeight: '1.7'}}>To build one of the most trusted cricket analytics platforms that delivers consistent insights, accurate predictions, and engaging content for fans worldwide.</p>
-                </div>
-                <div className="glass-panel" style={{padding: '2rem'}}>
-                    <h3 style={{fontSize: '1.5rem', marginBottom: '1rem', color: '#8b5cf6'}}>Legal & Ownership</h3>
-                    <p style={{color: '#f8fafc', fontWeight: 800, fontSize: '1.1rem', lineHeight: '1.7', marginBottom: '0.5rem'}}>CricketDecoded operates under THE LR COMPANY.</p>
-                    <p style={{color: '#94a3b8', lineHeight: '1.7'}}><strong>Owner:</strong> Lakshit Raina<br/><strong>Contact:</strong> <a href="mailto:zykto.official@gmail.com" style={{color: '#10b981', textDecoration: 'none'}}>zykto.official@gmail.com</a></p>
-                </div>
-            </div>
-
-            <div style={{textAlign: 'center', padding: '2rem', background: 'rgba(0,0,0,0.3)', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)'}}>
-                <h4 style={{color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.85rem', marginBottom: '1rem'}}>Disclaimer</h4>
-                <p style={{color: '#64748b', fontSize: '0.9rem', maxWidth: '800px', margin: '0 auto', lineHeight: '1.6'}}>
-                    This website provides cricket predictions and analysis for informational and entertainment purposes only. We are not affiliated with any official cricket league, team, or organization.
-                </p>
+          <div className="features-grid" style={{maxWidth: '1200px', margin: '0 auto'}}>
+            <div className="bento-card observe">
+              <div className="bento-icon">🎯</div>
+              <h3>Match Predictions & Win Probability</h3>
+              <p>Get data-driven insights and AI-powered win probabilities before every match starts.</p>
             </div>
             
-            <div style={{marginTop: '4rem', textAlign: 'center'}}>
-               <AdComponent adKey="481bb8d376b950fb640f010f57eccd74" type="native" />
+            <div className="bento-card observe">
+              <div className="bento-icon">🪙</div>
+              <h3>Toss & Pitch Analysis</h3>
+              <p>Understand the ground conditions, average scores, and how the toss impacts the game.</p>
             </div>
+            
+            <div className="bento-card observe">
+              <div className="bento-icon">🏏</div>
+              <h3>Team Insights & Key Player Stats</h3>
+              <p>Deep dive into head-to-head records, player forms, and historical team performance.</p>
+            </div>
+            
+            <div className="bento-card observe">
+              <div className="bento-icon">📰</div>
+              <h3>Latest Cricket News & Updates</h3>
+              <p>Stay informed with the newest updates and breaking stories from the cricket universe.</p>
+            </div>
+          </div>
         </section>
-      </div>
 
-      <footer style={{padding: '4rem 2rem', background: '#0a0a0f', color: '#94a3b8', textAlign: 'center', marginTop: 'auto'}}>
-        <p>&copy; 2026 Cricket Decoded. All rights reserved.</p>
+        <section style={{ padding: "5rem 2rem", background: "var(--white)" }}>
+           <div className="features-grid" style={{ maxWidth: '1200px', margin: '0 auto', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))' }}>
+              <div className="bento-card observe" style={{ background: '#f8fafc', border: '1px solid rgba(16,185,129,0.1)' }}>
+                  <h3 style={{ fontSize: '1.8rem', color: 'var(--black)', marginBottom: '1rem' }}>Our Vision</h3>
+                  <p style={{ color: 'var(--slate-500)', fontSize: '1.1rem', lineHeight: '1.8' }}>
+                      To build one of the most trusted cricket analytics platforms that delivers consistent insights, accurate predictions, and engaging content for fans worldwide.
+                  </p>
+              </div>
+
+              <div className="bento-card observe" style={{ background: '#f8fafc', border: '1px solid rgba(16,185,129,0.1)' }}>
+                  <h3 style={{ fontSize: '1.8rem', color: 'var(--black)', marginBottom: '1rem' }}>Legal & Ownership</h3>
+                  <p style={{ color: 'var(--slate-500)', fontSize: '1.1rem', lineHeight: '1.8' }}>
+                      CricketDecoded operates under <strong>THE LR COMPANY</strong>.
+                  </p>
+                  <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.8rem', borderBottom: '1px solid #e2e8f0' }}>
+                          <span style={{ color: 'var(--slate-500)', fontWeight: 600 }}>Owner</span>
+                          <span style={{ color: 'var(--black)', fontWeight: 700 }}>Lakshit Raina</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.8rem' }}>
+                          <span style={{ color: 'var(--slate-500)', fontWeight: 600 }}>Contact Email</span>
+                          <a href="mailto:zykto.official@gmail.com" style={{ color: 'var(--emerald)', fontWeight: 700, textDecoration: 'none' }}>zykto.official@gmail.com</a>
+                      </div>
+                  </div>
+              </div>
+           </div>
+           
+           <div className="bento-card observe" style={{ maxWidth: '1200px', margin: '3rem auto 0', background: '#fff1f2', border: '1px solid #ffe4e6', textAlign: 'center' }}>
+               <h4 style={{ color: '#e11d48', fontSize: '1.2rem', marginBottom: '1rem' }}>Disclaimer</h4>
+               <p style={{ color: '#475569', fontSize: '1rem', lineHeight: '1.6', maxWidth: '800px', margin: '0 auto' }}>
+                   This website provides cricket predictions and analysis for informational and entertainment purposes only. We are not affiliated with any official cricket league, team, or organization.
+               </p>
+           </div>
+           
+           <div style={{ maxWidth: '1200px', margin: '4rem auto 0', textAlign: 'center' }}>
+               <AdComponent slotId="about-bottom" />
+           </div>
+        </section>
+
+      </main>
+
+      <footer style={{ background: 'var(--black)', color: 'var(--white)', padding: '4rem 2rem', textAlign: 'center' }}>
+        <p style={{ color: 'var(--slate-400)' }}>&copy; 2026 Cricket Decoded. All rights reserved.</p>
       </footer>
-    </div>
+    </>
   );
 }
