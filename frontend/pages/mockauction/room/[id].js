@@ -330,6 +330,7 @@ import { auctionPlayers } from '../../../data/auctionPlayers';
 // 3. LIVE MULTIPLAYER AUCTION ROOM
 // -------------------------------------------------------------
 function LiveAuctionRoom({ roomId, room, user }) {
+    const router = useRouter();
     const isHost = room.hostId === user.uid;
     const state = room.auctionState;
     const myPlayerInfo = room.players[user.uid];
