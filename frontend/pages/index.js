@@ -149,8 +149,19 @@ export default function LandingPage({ matches, blogs }) {
           </div>
         </div>
 
-        {/* STATS */}
-        <div className="stats-bar observe">
+        <div className="content-wrapper-with-ads" style={{ position: 'relative' }}>
+          {/* SIDEBAR ADS (ONLY FOR CONTENT BELOW HERO) */}
+          <div className="sidebar-ad left-sidebar">
+             <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left-h"></iframe>
+          </div>
+          <div className="sidebar-ad right-sidebar">
+             <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-h"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7b63b4b297c7e53c1d003813c9724a13" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-2-h"></iframe>
+          </div>
+
+          {/* STATS */}
+          <div className="stats-bar observe">
           <div className="stat-item"><span className="stat-val">74</span><span className="stat-lbl">IPL Matches</span></div>
           <div className="stat-item"><span className="stat-val">10</span><span className="stat-lbl">Franchises</span></div>
           <div className="stat-item"><span className="stat-val">1M+</span><span className="stat-lbl">Fans Tracked</span></div>
@@ -273,7 +284,8 @@ export default function LandingPage({ matches, blogs }) {
 
           <AdComponent adKey="481bb8d376b950fb640f010f57eccd74" type="native" />
         </section>
-      </main>
+      </div>
+    </main>
 
       <footer style={{ padding: '4rem 2rem', background: '#0a0a0f', color: 'white', textAlign: 'center' }}>
         <div style={{ marginBottom: '2rem' }}>
@@ -309,6 +321,11 @@ export default function LandingPage({ matches, blogs }) {
         }
         .blog-card:hover .blog-thumb { transform: scale(1.08); }
         
+        .sidebar-ad { position: absolute; top: 0; width: 160px; z-index: 50; display: flex; flex-direction: column; align-items: center; }
+        .left-sidebar { left: calc(50% - 660px); }
+        .right-sidebar { right: calc(50% - 660px); }
+        @media (max-width: 1320px) { .sidebar-ad { display: none; } }
+
         .blog-card-img-wrapper { 
           height: 220px; 
           border-radius: 1.5rem; 
