@@ -4,7 +4,8 @@ export default function NewsFeed() {
   const [news, setNews] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/news')
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://cricketdecoded.onrender.com';
+    fetch(`${API_BASE}/api/news`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
