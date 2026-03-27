@@ -163,12 +163,18 @@ export default function LandingPage({ matches, blogs }) {
         <section id="fixtures" style={{ position: 'relative' }}>
           {/* SIDEBAR ADS STARTING HERE */}
           <div className="sidebar-ad left-sidebar">
-             <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left-fix"></iframe>
+             <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left-1"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left-2"></iframe>
           </div>
           <div className="sidebar-ad right-sidebar">
-             <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-fix"></iframe>
+             <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-1"></iframe>
              <div style={{marginTop: '20px'}}></div>
-             <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7b63b4b297c7e53c1d003813c9724a13" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-2-fix"></iframe>
+             <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7b63b4b297c7e53c1d003813c9724a13" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-2"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.highperformanceformat.com/watchnew?key=049ed5c6c01b883957767c887fde882d" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-3"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=d60542bb90219e73c31c84525bd1da05" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-4"></iframe>
           </div>
 
           <div className="observe" style={{ textAlign: 'center', marginBottom: '3rem' }}>
@@ -322,8 +328,8 @@ export default function LandingPage({ matches, blogs }) {
         .blog-card:hover .blog-thumb { transform: scale(1.08); }
         
         .sidebar-ad { position: sticky; top: 110px; width: 160px; z-index: 50; display: flex; flex-direction: column; align-items: center; }
-        .left-sidebar { float: left; margin-left: calc(50% - 680px); left: 0; height: 0; }
-        .right-sidebar { float: right; margin-right: calc(50% - 680px); right: 0; height: 0; }
+        .left-sidebar { float: left; margin-left: calc(50% - 680px); left: 0; }
+        .right-sidebar { float: right; margin-right: calc(50% - 680px); right: 0; }
         @media (max-width: 1360px) { .sidebar-ad { display: none; } }
 
         .blog-card-img-wrapper { 
