@@ -113,6 +113,24 @@ const seedMatchBlog = async () => {
 
           <p>Compare booking platforms and learn fast-booking tricks on our premium online ticketing guide.</p>
         `
+      },
+      {
+        title: "IPL 2026: Complete Guide, Teams, Schedule & Predictions",
+        slug: "ipl-2026-complete-guide-teams-schedule-predictions",
+        category: "guide",
+        keywords: "IPL 2026 complete guide, IPL 2026 teams list, IPL 2026 predictions, IPL 2026 schedule",
+        content: `
+          <p>Welcome to the ultimate guide for TATA IPL 2026! From the opening clash in Bengaluru to the final showdown, we cover every team, every captain, and every prediction for the 19th edition.</p>
+          
+          <h2>Tournament Overview</h2>
+          <ul>
+            <li><strong>Total Teams:</strong> 10 Professional Franchises</li>
+            <li><strong>Total Matches:</strong> 74 (League + Playoffs)</li>
+            <li><strong>Key Contenders:</strong> RCB, SRH, MI, KKR</li>
+          </ul>
+
+          <p>Explore our specialized hubs for schedules, squads, and tickets using the ultimate IPL 2026 mega guide.</p>
+        `
       }
     ];
 
