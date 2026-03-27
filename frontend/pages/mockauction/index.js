@@ -45,6 +45,7 @@ export default function MockAuctionLanding() {
         <div style={{display:'flex', gap:'20px', alignItems:'center'}}>
           {user ? (
             <>
+               <button onClick={() => router.push('/mockauction/history')} className="btn-ghost">View History</button>
                <img 
                  src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=4285F4&color=fff`} 
                  alt="Profile" 
@@ -52,6 +53,7 @@ export default function MockAuctionLanding() {
                  referrerPolicy="no-referrer"
                  onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=4285F4&color=fff`}}
                />
+               <button onClick={handleSignOut} className="btn-ghost" style={{color:'var(--red)'}}>Sign Out</button>
             </>
           ) : (
             <button onClick={handleSignIn} className="nav-cta" style={{background:'#4285F4'}}>
@@ -151,8 +153,8 @@ export default function MockAuctionLanding() {
         .hero-badge { background: #dcfce7; color: #166534; padding: 6px 16px; border-radius: 100px; font-weight: 700; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 25px; border: 1px solid #bbf7d0;}
         .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 7vw, 6rem); font-weight: 900; line-height: 0.95; }
         .hero h1 em { color: var(--green); font-style: italic; display: block; }
-        
-        .btn-primary { background: var(--green); color: white; border-radius: 100px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(29,185,84,0.25); transition: 0.2s; }
+        .hero-actions { display: flex; gap: 20px; justify-content: center; }
+        .btn-primary { background: var(--green); color: white; border-radius: 100px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(29,185,84,0.25); transition: 0.2s; border: none; }
         .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(29,185,84,0.35); }
         .btn-secondary { background: white; color: black; border: 2px solid #e2e8f0; border-radius: 100px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
         .btn-secondary:hover { border-color: black; transform: translateY(-3px); }
