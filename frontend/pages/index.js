@@ -205,7 +205,7 @@ export default function LandingPage({ matches, blogs }) {
 
           <div className="blog-grid" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2.5rem', padding: '0 20px' }}>
             {displayBlogs.length > 0 ? displayBlogs.slice(0, 3).map((blog) => (
-              <div key={blog._id} className="blog-card observe" onClick={() => router.push('/blog/' + blog.slug)} style={{ cursor: 'pointer' }}>
+              <div key={blog._id} className="blog-card observe" onClick={() => router.push('/' + blog.slug)} style={{ cursor: 'pointer' }}>
                 <div className="blog-card-img-wrapper" style={{ height: '220px', borderRadius: '1.5rem', marginBottom: '1.25rem', overflow: 'hidden', position: 'relative', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}>
                   <img src={blog.image || '/lrimg.png'} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }} className="blog-thumb" />
                   <div className="blog-category-tag">{blog.category || 'Cricket'}</div>
@@ -234,7 +234,7 @@ export default function LandingPage({ matches, blogs }) {
 
             <div className="blog-grid" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', padding: '0 20px' }}>
                {displayBlogs.slice(3).map((blog) => (
-                  <div key={blog._id} className="news-item-card observe" onClick={() => router.push('/blog/' + blog.slug)} style={{ cursor: 'pointer', background: '#fff', padding: '20px', borderRadius: '1.25rem', display: 'flex', gap: '20px', alignItems: 'center', border: '1px solid #e2e8f0', transition: 'all 0.3s ease' }}>
+                  <div key={blog._id} className="news-item-card observe" onClick={() => router.push('/' + blog.slug)} style={{ cursor: 'pointer', background: '#fff', padding: '20px', borderRadius: '1.25rem', display: 'flex', gap: '20px', alignItems: 'center', border: '1px solid #e2e8f0', transition: 'all 0.3s ease' }}>
                      <div style={{ width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
                         <img src={blog.image || '/lrimg.png'} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                      </div>
@@ -283,39 +283,73 @@ export default function LandingPage({ matches, blogs }) {
       </footer>
 
       <style jsx>{`
-        .hero { position: relative; padding: 120px 20px 80px; display: flex; align-items: center; max-width: 1300px; margin: 0 auto; overflow: hidden; }
-        .hero-main-img { width: 100%; max-width: 600px; filter: drop-shadow(0 0 50px rgba(16,185,129,0.2)); }
-        
-        .blog-card { background: white; border-radius: 2rem; padding: 1rem; border: 1px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
-        .blog-card:hover { transform: translateY(-12px); box-shadow: 0 30px 60px rgba(0,0,0,0.06); border-color: #10b98144; }
+        /* BLOG CARD STYLES (NEW) */
+        .blog-card { 
+          background: white; 
+          border-radius: 2rem; 
+          padding: 1rem; 
+          border: 1px solid #f1f5f9; 
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+          position: relative; 
+          display: flex;
+          flex-direction: column;
+        }
+        .blog-card:hover { 
+          transform: translateY(-12px); 
+          box-shadow: 0 30px 60px rgba(0,0,0,0.06); 
+          border-color: #10b98144; 
+        }
         .blog-card:hover .blog-thumb { transform: scale(1.08); }
         
-        .blog-category-tag { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 5px 12px; border-radius: 100px; font-size: 0.65rem; font-weight: 900; color: #10b981; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .blog-card-img-wrapper { 
+          height: 220px; 
+          border-radius: 1.5rem; 
+          margin-bottom: 1.25rem; 
+          overflow: hidden; 
+          position: relative; 
+          box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+        }
+        
+        .blog-thumb { 
+          width: 100%; 
+          height: 100%; 
+          object-fit: cover; 
+          transition: transform 0.5s ease; 
+        }
 
+        .blog-category-tag { 
+          position: absolute; 
+          top: 15px; 
+          right: 15px; 
+          background: rgba(255,255,255,0.9); 
+          backdrop-filter: blur(10px); 
+          padding: 5px 12px; 
+          border-radius: 100px; 
+          font-size: 0.65rem; 
+          font-weight: 900; 
+          color: #10b981; 
+          text-transform: uppercase; 
+          letter-spacing: 1px; 
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        }
+
+        /* NEWS ITEM STYLES (NEW) */
+        .news-item-card {
+          background: #fff; 
+          padding: 20px; 
+          border-radius: 1.25rem; 
+          display: flex; 
+          gap: 20px; 
+          align-items: center; 
+          border: 1px solid #e2e8f0; 
+          transition: all 0.3s ease;
+        }
         .news-item-card:hover { transform: scale(1.02); border-color: #10b981; box-shadow: 0 10px 25px rgba(16,185,129,0.05); }
 
         .section-tag { background: #10b98115; color: #10b981; padding: 6px 16px; border-radius: 100px; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 1rem; }
         .section-title { font-size: 2.75rem; font-weight: 950; letter-spacing: -1px; color: #0f172a; }
 
-        .btn-primary { background: #10b981; color: white; padding: 16px 32px; border-radius: 100px; font-weight: 900; border: none; box-shadow: 0 15px 35px rgba(16,185,129,0.25); transition: 0.3s; }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 20px 45px rgba(16,185,129,0.35); }
-
-        /* Ticker styles */
-        .ticker-wrap { background: #000; color: #fff; padding: 12px 0; display: flex; align-items: center; overflow: hidden; position: sticky; top: 0; z-index: 99; border-bottom: 1px solid #111; }
-        .ticker-label { background: #ef4444; color: #fff; padding: 0 15px; font-weight: 900; height: 100%; display: flex; align-items: center; position: absolute; left: 0; z-index: 10; font-size: 0.8rem; }
-        .ticker-track { display: flex; animation: ticker 40s linear infinite; padding-left: 100px; }
-        .ticker-item { white-space: nowrap; margin-right: 50px; font-size: 0.9rem; font-weight: 600; display: flex; alignItems: center; gap: 10px; }
-        .ticker-live-badge { background: #ef4444; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; }
-        .ticker-end-badge { background: #334155; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; }
-        .ticker-score { color: #fbbf24; font-weight: 900; }
-
-        @keyframes ticker {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-
         @media (max-width: 768px) {
-          .hero { flex-direction: column; text-align: center; padding-top: 60px; }
           .section-title { font-size: 2rem; }
         }
       `}</style>
