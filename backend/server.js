@@ -12,14 +12,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
 const matchRoutes = require('./routes/matchRoutes');
 const blogRoutes = require('./routes/blogRoutes');
 const newsRoutes = require('./routes/newsRoutes');
+const auctionRoutes = require('./routes/auctionRoutes');
 
 app.use('/api', matchRoutes);
 app.use('/api', blogRoutes);
 app.use('/api', newsRoutes);
+app.use('/api', auctionRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API is running' });
