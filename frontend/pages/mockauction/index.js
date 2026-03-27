@@ -45,9 +45,13 @@ export default function MockAuctionLanding() {
         <div style={{display:'flex', gap:'20px', alignItems:'center'}}>
           {user ? (
             <>
-               <button onClick={() => router.push('/mockauction/history')} className="btn-ghost">View History</button>
-               <img src={user.photoURL} alt="Profile" style={{width:'36px', height:'36px', borderRadius:'50%'}} />
-               <button onClick={handleSignOut} className="btn-ghost" style={{color:'var(--red)'}}>Sign Out</button>
+               <img 
+                 src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=4285F4&color=fff`} 
+                 alt="Profile" 
+                 style={{width:'36px', height:'36px', borderRadius:'50%', objectFit: 'cover'}} 
+                 referrerPolicy="no-referrer"
+                 onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=4285F4&color=fff`}}
+               />
             </>
           ) : (
             <button onClick={handleSignIn} className="nav-cta" style={{background:'#4285F4'}}>

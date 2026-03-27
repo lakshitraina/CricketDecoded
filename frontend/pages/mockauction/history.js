@@ -55,7 +55,13 @@ export default function MockAuctionHistory() {
            
            <div className="dash-inner" style={{paddingTop: '120px', maxWidth: '1000px', margin: '0 auto', paddingBottom: '100px'}}>
                <div style={{display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '40px'}}>
-                  <img src={user?.photoURL} alt={user?.displayName} style={{width: '60px', height: '60px', borderRadius: '50%', boxShadow: '0 10px 20px rgba(0,0,0,0.1)'}} />
+                  <img 
+                      src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || 'User')}&background=4285F4&color=fff`} 
+                      alt={user?.displayName} 
+                      style={{width: '60px', height: '60px', borderRadius: '50%', boxShadow: '0 10px 20px rgba(0,0,0,0.1)', objectFit: 'cover'}} 
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || 'User')}&background=4285F4&color=fff`}}
+                  />
                   <div>
                      <h1 style={{fontSize: '2.5rem', fontWeight: 900, color: '#0f172a', fontFamily: "'Playfair Display', serif"}}>My Auction <em style={{color: '#10b981', fontStyle: 'italic'}}>History.</em></h1>
                      <p style={{color: '#64748b', fontSize: '1.1rem'}}>Welcome back, {user?.displayName}. Here are your finalized squads from past multiplayer lobbies.</p>
