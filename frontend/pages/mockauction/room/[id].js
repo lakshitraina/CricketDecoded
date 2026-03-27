@@ -326,11 +326,14 @@ function MultiplayerRetention({ roomId, room, user }) {
 
 import { auctionPlayers } from '../../../data/auctionPlayers';
 
+import { playBidPing, playHammerThud } from '../../../utils/audio';
+
 // -------------------------------------------------------------
 // 3. LIVE MULTIPLAYER AUCTION ROOM
 // -------------------------------------------------------------
 function LiveAuctionRoom({ roomId, room, user }) {
     const router = useRouter();
+    const [muted, setMuted] = useState(false);
     const isHost = room.hostId === user.uid;
     const state = room.auctionState;
     const myPlayerInfo = room.players[user.uid];
@@ -406,6 +409,20 @@ function LiveAuctionRoom({ roomId, room, user }) {
         }, 200);
         return () => clearInterval(interval);
     }, [state?.biddingActive, state?.timerEndsAt, isHost]);
+
+    // AUDIO TRIGGER: Bid Ping
+    useEffect(() => {
+        if (!muted && state?.currentBid > 0 && state?.biddingActive) {
+            playBidPing();
+        }
+    }, [state?.currentBid]);
+
+    // AUDIO TRIGGER: Hammer Drop
+    useEffect(() => {
+        if (!muted && state?.overlayMsg) {
+            playHammerThud();
+        }
+    }, [state?.overlayMsg]);
 
     // HOST ONLY: AI Bidding Loop
     useEffect(() => {
@@ -501,12 +518,79 @@ function LiveAuctionRoom({ roomId, room, user }) {
     if (!state?.currentPlayer && !state?.auctionEnded) return <div style={{background: '#0f172a', height: '100vh', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>Preparing live stage...</div>;
 
     if (state?.auctionEnded) {
-         return (
-             <div style={{background: '#0f172a', minHeight: '100vh', color: '#fff', textAlign: 'center', paddingTop: '100px'}}>
-                 <h1 style={{fontSize: '3rem', fontFamily: "'Playfair Display', serif"}}>Auction Complete! 🎉</h1>
-                 <button onClick={() => router.push('/')} className="btn-primary" style={{marginTop: '30px', padding: '15px 30px'}}>Return Home</button>
-             </div>
-         );
+        // CELEBRATION
+        useEffect(() => {
+            import('canvas-confetti').then(confetti => {
+                confetti.default({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+            });
+        }, []);
+
+        // Calculate scores for all teams
+        const getScore = (squad, purse) => {
+            let s = 0;
+            const b = squad.filter(p => (p.role||'').includes('Batter')).length;
+            const bo = squad.filter(p => (p.role||'').includes('Bowler')).length;
+            const ar = squad.filter(p => (p.role||'').includes('All')).length;
+            const wk = squad.filter(p => (p.role||'').includes('Wicket')).length;
+            if (b + ar >= 7) s += 25;
+            if (bo + ar >= 6) s += 25;
+            if (wk >= 1) s += 15;
+            s += ((120 - purse) / 120) * 15;
+            if (squad.filter(p => p.set === 1).length >= 1) s += 20;
+            return Math.min(100, Math.round(s));
+        };
+
+        const ranking = allFranchises.map(t => {
+            // Find full squad data
+            let fullSquad = [];
+            if (t.isHuman) {
+                const pInfo = Object.values(room.players).find(p => p.franchise === t.name);
+                fullSquad = [...(pInfo?.retentions || []), ...(pInfo?.squad || [])];
+            } else {
+                fullSquad = state.aiTeams[t.name]?.squad || [];
+            }
+            const score = getScore(fullSquad, t.purse);
+            return { ...t, score, grade: score >= 90 ? 'S' : score >= 80 ? 'A+' : score >= 70 ? 'A' : 'B' };
+        }).sort((a,b) => b.score - a.score);
+
+        return (
+            <div className="auction-room-v2" style={{overflowY: 'auto', padding: '60px 20px'}}>
+                <Head><title>Leaderboard | {roomId}</title></Head>
+                <div style={{maxWidth: '900px', margin: '0 auto'}}>
+                    <div style={{textAlign: 'center', marginBottom: '50px'}}>
+                        <h1 style={{fontSize: '3.5rem', fontWeight: 900, fontFamily: "'Playfair Display', serif", marginBottom: '10px'}}>Auction <span style={{color: '#10b981'}}>Concluded.</span></h1>
+                        <p style={{color: '#94a3b8', fontSize: '1.2rem'}}>The hammer has fallen. Here is the final standing of your lobby.</p>
+                    </div>
+
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
+                        {ranking.map((team, idx) => (
+                            <div key={team.name} style={{background: '#1e293b', padding: '30px', borderRadius: '24px', border: team.name === myPlayerInfo.franchise ? '1px solid #10b981' : '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.2)'}}>
+                                {team.name === myPlayerInfo.franchise && <div style={{position:'absolute', top:0, left:0, width:'4px', height:'100%', background:'#10b981'}}></div>}
+                                <div style={{display: 'flex', alignItems: 'center', gap: '25px'}}>
+                                    <div style={{fontSize: '2rem', fontWeight: 900, color: idx === 0 ? '#f59e0b' : '#64748b', minWidth: '40px'}}>#{idx + 1}</div>
+                                    <img src={`/teams/${team.name.toLowerCase()}.png`} style={{width: '60px', height: '60px'}} />
+                                    <div>
+                                        <h3 style={{fontSize: '1.4rem', fontWeight: 900}}>{team.name} {team.isHuman ? '👤' : '🤖'}</h3>
+                                        <div style={{color: '#94a3b8', fontSize: '0.85rem'}}>Squad Size: {team.squadLen} · Rem. Purse: ₹{team.purse.toFixed(2)} Cr</div>
+                                    </div>
+                                </div>
+                                <div style={{textAlign: 'right'}}>
+                                    <div style={{fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px'}}>Strength Score</div>
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}>
+                                        <div style={{fontSize: '2.5rem', fontWeight: 900, color: team.score >= 80 ? '#10b981' : '#f59e0b'}}>{team.grade}</div>
+                                        <div style={{fontSize: '1.2rem', fontWeight: 800, color: '#fff'}}>{team.score}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{marginTop: '50px', textAlign: 'center'}}>
+                        <button onClick={() => router.push('/mockauction')} className="btn-primary" style={{padding: '15px 40px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 800, cursor: 'pointer', fontSize: '1.1rem'}}>Return to Lobby</button>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     const DASH_ARRAY = 283;
@@ -524,7 +608,10 @@ function LiveAuctionRoom({ roomId, room, user }) {
            <div className="room-nav">
               <div style={{fontWeight: 900, fontStyle: 'italic', color: '#10b981'}}>Cricket<span style={{color:'white'}}>Decoded</span></div>
               <div style={{fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px'}}>Live Multiplayer Room</div>
-              <button onClick={() => router.push('/')} className="exit-btn">Exit Match</button>
+              <div style={{display: 'flex', gap: '15px'}}>
+                  <button onClick={() => setMuted(!muted)} className="exit-btn" style={{borderColor: muted ? '#ef4444' : 'rgba(255,255,255,0.1)', color: muted ? '#ef4444' : '#94a3b8'}}>{muted ? '🔇' : '🔊'}</button>
+                  <button onClick={() => router.push('/')} className="exit-btn">Exit Match</button>
+              </div>
            </div>
 
            <div className="auction-3-col">

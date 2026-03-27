@@ -25,10 +25,12 @@ function aiDecidesBid(franchise, player, currentBid, setNumber) {
   return { action: "BID", amount: currentBid + increment, delay };
 }
 
+import { playBidPing, playHammerThud } from '../../utils/audio';
+
 export default function MockAuctionV2() {
   const router = useRouter();
+  const [muted, setMuted] = useState(false);
 
-  // STATE INITIALIZATION
   const [initFinished, setInitFinished] = useState(false);
   const [userState, setUserState] = useState(null);
   const [aiTeams, setAiTeams] = useState({});
@@ -138,11 +140,20 @@ export default function MockAuctionV2() {
     if (hb === 'None') {
        setOverlayMsg('UNSOLD');
        addLog(`UNSOLD - No bids for ${cp.name}.`, '#ef4444');
+       if (!muted) playHammerThud();
     } else {
        setOverlayMsg('SOLD');
        addLog(`SOLD! ${cp.name} to ${hb} for ₹${cb.toFixed(2)} Cr!`, '#10b981');
+       if (!muted) playHammerThud();
        
-       // Deduct Purse & Add to Squad safely via functional updates
+       // CELEBRATION: Confetti if User wins
+       if (hb === userState.name) {
+          import('canvas-confetti').then(confetti => {
+             confetti.default({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#1DB954', '#ffffff', '#f59e0b'] });
+          });
+       }
+
+       // Deduct Purse & Add to Squad
        if (hb === userState.name) {
          setUserState(prev => ({
            ...prev,
@@ -163,9 +174,27 @@ export default function MockAuctionV2() {
 
     // Schedule next player
     setTimeout(() => {
-       setPlayerQueue(prev => prev.slice(1));
-       if (playerQueue.length <= 1) router.push('/mockauction'); // End Game if empty
-       else loadNextPlayer();
+       setPlayerQueue(prev => {
+          const next = prev.slice(1);
+          if (next.length === 0) {
+             // SAVE FINAL STATE FOR SUMMARY
+             const finalResults = {
+                userTeam: userState.name,
+                userPurse: userState.purse,
+                userSquad: userState.squad,
+                aiTeams: aiTeams,
+                date: new Date().toISOString()
+             };
+             localStorage.setItem('auction_summary_payload', JSON.stringify(finalResults));
+             router.push('/mockauction/summary');
+             return [];
+          }
+          return next;
+       });
+       // Only trigger next player if we didn't just end
+       if (playerQueue.length > 1) {
+          loadNextPlayer();
+       }
     }, 3000);
   };
 
@@ -205,6 +234,7 @@ export default function MockAuctionV2() {
   const placeBid = (teamName, amount) => {
     setCurrentBid(amount);
     setHighestBidder(teamName);
+    if (!muted) playBidPing();
     
     // Reset timer back heavily to simulate auctioneer waiting for counter
     setTimer(prev => prev < 10 ? 10 : 15);
@@ -246,7 +276,10 @@ export default function MockAuctionV2() {
       <div className="room-nav">
          <div style={{fontWeight: 900, fontStyle: 'italic', color: '#10b981'}}>Cricket<span style={{color:'white'}}>Decoded</span></div>
          <div style={{fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px'}}>Mock Auction 2026 Simulator</div>
-         <button onClick={() => router.push('/')} className="exit-btn">Exit Lobby</button>
+         <div style={{display: 'flex', gap: '15px'}}>
+             <button onClick={() => setMuted(!muted)} className="exit-btn" style={{borderColor: muted ? '#ef4444' : 'rgba(255,255,255,0.1)', color: muted ? '#ef4444' : '#94a3b8'}}>{muted ? '🔇' : '🔊'}</button>
+             <button onClick={() => router.push('/')} className="exit-btn">Exit Lobby</button>
+         </div>
       </div>
 
       <div className="auction-3-col">
