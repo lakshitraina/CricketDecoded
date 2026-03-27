@@ -32,11 +32,6 @@ export default function TomorrowMatchPrediction() {
 
       <main className="match-hub-page">
         
-        {/* TOP AD SECTION */}
-        <section className="ad-strip top-ad">
-           <AdComponent adKey="049ed5c6c01b883957767c887fde882d" height={90} width={728} />
-        </section>
-
         <article className="hub-container">
           
           {/* USER REQUESTED MATCH CARD (MODERN VERSION) */}
@@ -59,6 +54,11 @@ export default function TomorrowMatchPrediction() {
                 </div>
              </div>
           </div>
+
+          {/* AD MOVED BELOW CARD TO REMOVE TOP GAP */}
+          <section className="ad-strip top-ad" style={{marginTop: '0'}}>
+             <AdComponent adKey="049ed5c6c01b883957767c887fde882d" height={90} width={728} />
+          </section>
 
           <header className="hub-header">
             <h1 className="main-title">Tomorrow IPL Match 2026 – Match Prediction, Playing 11, Pitch Report</h1>
@@ -235,7 +235,7 @@ export default function TomorrowMatchPrediction() {
         .hub-container {
           max-width: 900px;
           margin: 0 auto;
-          padding: 0 20px 20px;
+          padding: 75px 20px 20px;
         }
         
         /* MATCH HUB CARD */
@@ -243,7 +243,7 @@ export default function TomorrowMatchPrediction() {
            background: #fff;
            border-radius: 20px;
            padding: 20px;
-           margin: 20px 0 30px;
+           margin: 0 0 30px;
            box-shadow: 0 15px 40px rgba(0,0,0,0.06);
            border: 1px solid rgba(0,0,0,0.05);
         }
@@ -268,7 +268,8 @@ export default function TomorrowMatchPrediction() {
         .mhc-status { font-size: 0.6rem; background: #ee4444; color: #fff; display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 900; text-transform: uppercase; margin-top: 6px; }
 
         .ad-strip.top-ad {
-           margin-top: 80px; /* Minimal space below fixed navbar */
+           margin-top: 0;
+           margin-bottom: 20px;
         }
 
         .hub-header { text-align: center; margin-bottom: 30px; }
