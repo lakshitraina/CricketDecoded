@@ -59,6 +59,24 @@ const seedMatchBlog = async () => {
           <h2>Team Impact</h2>
           <p>Hazlewood’s metronomic accuracy and steep bounce make him one of the most difficult bowlers to score against, especially at the high-scoring M. Chinnaswamy Stadium.</p>
         `
+      },
+      {
+        title: "RCB Squad 2026 – Full Team Players List & Analysis",
+        slug: "rcb-squad-2026-full-team-players-list",
+        category: "squad",
+        keywords: "RCB squad 2026, RCB players list, Rajat Patidar captain, Virat Kohli price, RCB auction 2026",
+        content: `
+          <p>The champions are back! Royal Challengers Bengaluru (RCB) have assembled a powerhouse squad for IPL 2026. Led by Captain Rajat Patidar and the legendary Virat Kohli, the 2026 squad is built for a title defense.</p>
+          
+          <h2>Squad Highlights</h2>
+          <ul>
+            <li><strong>Captain:</strong> Rajat Patidar</li>
+            <li><strong>Leading Stars:</strong> Virat Kohli, Josh Hazlewood, Bhuvneshwar Kumar</li>
+            <li><strong>New Signings:</strong> Venkatesh Iyer, Phil Salt, Tim David</li>
+          </ul>
+
+          <p>Check the full players list and tactical analysis on our premium squad hub.</p>
+        `
       }
     ];
 
