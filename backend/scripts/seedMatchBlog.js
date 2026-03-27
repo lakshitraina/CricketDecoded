@@ -167,6 +167,24 @@ const seedMatchBlog = async () => {
 
           <p>Check the full legal risk table and "Green Flags" guide on our premium betting safety hub.</p>
         `
+      },
+      {
+        title: "Stake IPL Promotion 2026 – Offers, Features & Full Guide",
+        slug: "stake-ipl-promotion-2026-offers-guide",
+        category: "analysis",
+        keywords: "Stake IPL promotion 2026, Stake early six win, Stake super over payout, Stake SGM prize pool",
+        content: `
+          <p>Stake has rolled out a specialized suite of promotions tailored specifically for the 2026 season. From First Ball Payouts to Super Over protection, learn how the new mechanics work.</p>
+          
+          <h2>Top Offers</h2>
+          <ul>
+            <li><strong>First Ball Payout:</strong> Instant win if your team hits a six on ball 1</li>
+            <li><strong>Super Over Payout:</strong> Win even if you lose the Super Over tie-breaker</li>
+            <li><strong>Weekly SGM Pool:</strong> Share in a $50,000 weekly prize pool</li>
+          </ul>
+
+          <p>Check the full feature comparison and KYC guide on our premium Stake promotion hub.</p>
+        `
       }
     ];
 
