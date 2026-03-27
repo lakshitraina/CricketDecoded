@@ -212,10 +212,15 @@ export default function LandingPage({ matches, blogs }) {
                 </div>
                 <h3 style={{ fontSize: '1.35rem', fontWeight: 900, marginBottom: '0.75rem', lineHeight: '1.3', color: '#0f172a' }}>{blog.title}</h3>
                 <p style={{ fontSize: '0.95rem', color: '#64748b', marginBottom: '1.25rem', lineBreak: 'anywhere' }}>
-                   {blog.content ? blog.content.replace(/<[^>]*>?/gm, '').substring(0, 110) : 'Premium cricket analysis and match insights...'}...
+                  {blog.content ? blog.content.replace(/<[^>]*>?/gm, '').substring(0, 110) : 'Premium cricket analysis and match insights...'}...
                 </p>
-                <div style={{ fontSize: '0.8rem', fontWeight: 900, color: '#10b981', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                   READ FULL HUB <span style={{ fontSize: '1.2rem' }}>→</span>
+                <div style={{ fontSize: '0.8rem', fontWeight: 900, color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                   <div style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      READ FULL HUB <span style={{ fontSize: '1.2rem' }}>→</span>
+                   </div>
+                   <div style={{ background: '#f1f5f9', padding: '4px 10px', borderRadius: '6px', fontSize: '0.7rem' }}>
+                      👁️ {blog.views || 0}
+                   </div>
                 </div>
               </div>
             )) : (
@@ -226,25 +231,28 @@ export default function LandingPage({ matches, blogs }) {
 
         {/* NEWS & BLOGS SECTION (FULL LIST) */}
         <section id="news-blogs" className="observe" style={{ marginTop: '80px', background: '#f8fafc', padding: '80px 0' }}>
-            <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-               <span className="section-tag">🗞️ Official Hubs</span>
-               <h2 className="section-title">News & Master Blogs</h2>
-               <p style={{ color: '#64748b', maxWidth: '600px', margin: '0 auto' }}>Complete coverage of IPL 2026. From official schedules to expert betting guides and team rosters.</p>
-            </div>
+          <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+            <span className="section-tag">🗞️ Official Hubs</span>
+            <h2 className="section-title">News & Master Blogs</h2>
+            <p style={{ color: '#64748b', maxWidth: '600px', margin: '0 auto' }}>Complete coverage of IPL 2026. From official schedules to expert betting guides and team rosters.</p>
+          </div>
 
-            <div className="blog-grid" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', padding: '0 20px' }}>
-               {displayBlogs.slice(3).map((blog) => (
-                  <div key={blog._id} className="news-item-card observe" onClick={() => router.push('/' + blog.slug)} style={{ cursor: 'pointer', background: '#fff', padding: '20px', borderRadius: '1.25rem', display: 'flex', gap: '20px', alignItems: 'center', border: '1px solid #e2e8f0', transition: 'all 0.3s ease' }}>
-                     <div style={{ width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
-                        <img src={blog.image || '/lrimg.png'} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                     </div>
-                     <div>
+          <div className="blog-grid" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', padding: '0 20px' }}>
+            {displayBlogs.slice(3).map((blog) => (
+              <div key={blog._id} className="news-item-card observe" onClick={() => router.push('/' + blog.slug)} style={{ cursor: 'pointer', background: '#fff', padding: '20px', borderRadius: '1.25rem', display: 'flex', gap: '20px', alignItems: 'center', border: '1px solid #e2e8f0', transition: 'all 0.3s ease' }}>
+                <div style={{ width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
+                  <img src={blog.image || '/lrimg.png'} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                     <div style={{ flexGrow: 1 }}>
                         <h4 style={{ margin: '0 0 5px', fontSize: '1rem', fontWeight: 800, color: '#1e293b' }}>{blog.title}</h4>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', textTransform: 'uppercase' }}>Explore Hub →</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                           <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981', textTransform: 'uppercase' }}>Explore Hub →</span>
+                           <span style={{ fontSize: '0.7rem', color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>👁️ {blog.views || 0}</span>
+                        </div>
                      </div>
-                  </div>
-               ))}
-            </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* BENTO FEATURES */}

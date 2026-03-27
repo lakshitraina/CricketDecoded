@@ -11,7 +11,11 @@ exports.getAllBlogs = async (req, res) => {
 
 exports.getBlogBySlug = async (req, res) => {
   try {
-    const blog = await Blog.findOne({ slug: req.params.slug });
+    const blog = await Blog.findOneAndUpdate(
+      { slug: req.params.slug },
+      { $inc: { views: 1 } },
+      { new: true }
+    );
     if (!blog) return res.status(404).json({ error: 'Blog not found' });
     res.json(blog);
   } catch (error) {

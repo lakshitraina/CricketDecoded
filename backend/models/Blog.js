@@ -7,7 +7,8 @@ const blogSchema = new mongoose.Schema({
   keywords: { type: String },
   matchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Match' },
   category: { type: String, required: true }, // 'prediction', 'fixtures', 'analysis', 'squad', 'tickets', 'guide'
-  image: { type: String } // Thumbnail path
+  image: { type: String }, // Thumbnail path
+  views: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Blog', blogSchema);
