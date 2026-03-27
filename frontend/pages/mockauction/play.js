@@ -1,87 +1,115 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Navbar from '../../components/Navbar';
-import AdComponent from '../../components/AdComponent';
+import { auctionPlayers, preRetentions } from '../../data/auctionPlayers';
 
-export default function MockAuctionPlay() {
-  const router = useRouter();
+// Utility for AI Decision
+function aiDecidesBid(franchise, player, currentBid, setNumber) {
+  if (franchise.purse < currentBid + 0.5) return "PASS";
   
-  // States
-  const [session, setSession] = useState(null);
-  const [player, setPlayer] = useState(null);
+  // Base willingness = base price * 1.5; adjust heavily by role need
+  let need = 0.5; // default
+  const roleCount = franchise.squad.filter(p => p.role === player.role).length;
+  if (roleCount === 0) need = 1.0;
+  if (roleCount > 2) need = 0.2;
+
+  const maxWilling = player.basePrice * (1.5 + (need * 3));
+  const aggressionFactor = setNumber >= 4 ? 1.3 : 1.0;
+
+  if (currentBid >= maxWilling * aggressionFactor) return "PASS";
+
+  const delay = Math.random() < 0.3 ? 800 : 1500 + Math.random() * 1500;
+  const increment = currentBid < 5.0 ? 0.25 : currentBid < 10.0 ? 0.5 : 1.0;
+
+  return { action: "BID", amount: currentBid + increment, delay };
+}
+
+export default function MockAuctionV2() {
+  const router = useRouter();
+
+  // STATE INITIALIZATION
+  const [initFinished, setInitFinished] = useState(false);
+  const [userState, setUserState] = useState(null);
+  const [aiTeams, setAiTeams] = useState({});
+  const [playerQueue, setPlayerQueue] = useState([]);
+  
+  // AUCTION TABLE STATE
+  const [currentPlayer, setCurrentPlayer] = useState(null);
+  const [currentSet, setCurrentSet] = useState(1);
   const [timer, setTimer] = useState(15);
   const [currentBid, setCurrentBid] = useState(0);
-  const [highestBidder, setHighestBidder] = useState('None');
-  const [bidLog, setBidLog] = useState([]);
+  const [highestBidder, setHighestBidder] = useState("None");
+  const [logs, setLogs] = useState([]);
   
-  const [loading, setLoading] = useState(true);
-  const [actionLocked, setActionLocked] = useState(false);
-  const [auctionOver, setAuctionOver] = useState(false);
-  
-  const timerRef = useRef(null);
+  const [biddingActive, setBiddingActive] = useState(false);
+  const [aiThinkingTeam, setAiThinkingTeam] = useState(null);
+  const [overlayMsg, setOverlayMsg] = useState(null); // 'SOLD' | 'UNSOLD'
 
-  // Fetch Session Initialization
+  const timerRef = useRef(null);
+  const logRef = useRef(null);
+  const aiTimeoutRef = useRef(null);
+
   useEffect(() => {
-    if (!router.isReady) return;
-    const sessionId = router.query.session || localStorage.getItem('auctionSession');
-    if (!sessionId) {
+    const rawState = localStorage.getItem('auction_v2_state');
+    if (!rawState) {
       router.push('/mockauction/setup');
       return;
     }
-    
-    fetchSession(sessionId).then(() => {
-      fetchNextPlayer(sessionId);
+    const state = JSON.parse(rawState);
+    setUserState({
+      name: state.userTeam,
+      purse: state.userPurse,
+      squad: state.userSquad,
+      rtmCards: state.rtmCards
     });
-  }, [router.isReady]);
+    setAiTeams(state.aiTeams);
+    
+    // Sort queue by Sets (1 to 5)
+    const queue = [...auctionPlayers].sort((a,b) => a.set - b.set);
+    setPlayerQueue(queue);
+    setInitFinished(true);
+  }, []);
 
-  const fetchSession = async (sessionId) => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    try {
-      const res = await fetch(`${API_BASE}/api/auction/session/${sessionId}`);
-      const data = await res.json();
-      if (data.sessionId) setSession(data);
-    } catch (e) {
-      console.error(e);
+  useEffect(() => {
+    if (initFinished && playerQueue.length > 0 && !currentPlayer) {
+      loadNextPlayer();
     }
+  }, [initFinished, playerQueue]);
+
+  const addLog = (msg, color) => {
+    setLogs(prev => [...prev, { msg, color, id: Date.now() }]);
+    setTimeout(() => {
+       if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
+    }, 50);
   };
 
-  const fetchNextPlayer = async (sessionId) => {
-    setLoading(true);
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    try {
-      const res = await fetch(`${API_BASE}/api/auction/player/${sessionId}`);
-      const data = await res.json();
-      
-      if (!data.player) {
-        setAuctionOver(true);
-        setLoading(false);
-        return;
-      }
+  const loadNextPlayer = () => {
+    if (playerQueue.length === 0) return router.push('/mockauction/summary'); // Route to summary later
 
-      setPlayer(data.player);
-      setCurrentBid(data.player.basePrice);
-      setHighestBidder('None');
-      setBidLog([`Player on the block! Base Price: ₹${data.player.basePrice} Cr`]);
-      setTimer(15);
-      setActionLocked(false);
-      setLoading(false);
-      
-      startTimer();
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-    }
+    const next = playerQueue[0];
+    setCurrentPlayer(next);
+    setCurrentSet(next.set);
+    setCurrentBid(next.basePrice / 100); // Standardize displaying Crores
+    setHighestBidder('None');
+    setOverlayMsg(null);
+    setAiThinkingTeam(null);
+    setBiddingActive(true);
+    setTimer(15);
+    addLog(`--- NEXT PLAYER: ${next.name} (Base ₹${next.basePrice / 100}Cr) ---`, '#64748b');
+    
+    startTimer();
+    triggerAIEvaluation('None', next.basePrice / 100);
   };
 
-  // Timer Logic
+  // ----------------- TIMER LOGIC -----------------
   const startTimer = () => {
     clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
-      setTimer((prev) => {
+      setTimer(prev => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
-          handleTimerEnd();
+          handleHammerDrop();
           return 0;
         }
         return prev - 1;
@@ -89,311 +117,400 @@ export default function MockAuctionPlay() {
     }, 1000);
   };
 
-  const handleTimerEnd = async () => {
-    setActionLocked(true);
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    
-    if (highestBidder !== session?.userTeam) {
-      // AI won it or Unsold
-      try {
-        const res = await fetch(`${API_BASE}/api/auction/pass`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: session.sessionId,
-            playerId: player._id,
-            currentBid,
-            highestBidder
-          })
-        });
-        const data = await res.json();
-        setBidLog(prev => [data.message, ...prev]);
-        
-        // Wait 2 seconds, then fetch next
-        setTimeout(() => {
-          fetchSession(session.sessionId); // refresh purse/squad
-          fetchNextPlayer(session.sessionId);
-        }, 2000);
-      } catch (e) { console.error(e); }
+  const handleHammerDrop = () => {
+    setBiddingActive(false);
+    clearTimeout(aiTimeoutRef.current);
+    setAiThinkingTeam(null);
+    clearInterval(timerRef.current);
+
+    if (highestBidder === 'None') {
+       setOverlayMsg('UNSOLD');
+       addLog(`UNSOLD - No bids for ${currentPlayer.name}.`, '#ef4444');
     } else {
-      // User supposedly won it (Already processed by backend during handleRaise)
-      setBidLog(prev => [`You successfully purchased ${player.name}!`, ...prev]);
-      setTimeout(() => {
-        fetchSession(session.sessionId);
-        fetchNextPlayer(session.sessionId);
-      }, 2000);
+       setOverlayMsg('SOLD');
+       addLog(`SOLD! ${currentPlayer.name} to ${highestBidder} for ₹${currentBid.toFixed(2)} Cr!`, '#10b981');
+       
+       // Deduct Purse & Add to Squad
+       if (highestBidder === userState.name) {
+         setUserState(prev => ({
+           ...prev,
+           purse: prev.purse - currentBid,
+           squad: [...prev.squad, { ...currentPlayer, price: currentBid }]
+         }));
+       } else {
+         setAiTeams(prev => ({
+           ...prev,
+           [highestBidder]: {
+              ...prev[highestBidder],
+              purse: prev[highestBidder].purse - currentBid,
+              squad: [...prev[highestBidder].squad, { ...currentPlayer, price: currentBid }]
+           }
+         }));
+       }
     }
+
+    // Schedule next player
+    setTimeout(() => {
+       setPlayerQueue(prev => prev.slice(1));
+       if (playerQueue.length <= 1) router.push('/mockauction'); // End Game if empty
+       else loadNextPlayer();
+    }, 3000);
   };
 
-  const handleRaise = async () => {
-    if (actionLocked) return;
-    setActionLocked(true);
-    clearInterval(timerRef.current);
+  // ----------------- AI BIDDING LOGIC -----------------
+  const triggerAIEvaluation = (currentWinningTeam, currentPrice) => {
+     if (!biddingActive) return;
+     
+     // Only teams not currently winning can evaluate
+     const eligibleAIs = Object.keys(aiTeams).filter(team => team !== currentWinningTeam);
+     if (eligibleAIs.length === 0) return;
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    const bidValue = highestBidder === 'None' ? player.basePrice : currentBid + 0.5;
+     // Pick a random AI team to analyze their bid
+     const evaluatorName = eligibleAIs[Math.floor(Math.random() * eligibleAIs.length)];
+     const evaluatorStats = aiTeams[evaluatorName];
 
-    // Fast Forward - Simulate User Bid Locally
-    setBidLog(prev => [`You placed a bid for ₹${bidValue} Cr.`, ...prev]);
-    setCurrentBid(bidValue);
-    setHighestBidder(session.userTeam);
+     const decision = aiDecidesBid(evaluatorStats, currentPlayer, currentPrice, currentSet);
 
-    try {
-      // Small artificial delay to make it feel like AI is "thinking"
-      setTimeout(async () => {
-        const res = await fetch(`${API_BASE}/api/auction/bid`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: session.sessionId,
-            playerId: player._id,
-            bidAmount: bidValue
-          })
-        });
-        const data = await res.json();
+     if (decision.action === 'BID') {
+        const timeout = decision.delay;
+        
+        // Show subtle "Thinking" badge in right panel
+        if (timeout > 1500) setAiThinkingTeam(evaluatorName);
 
-        if (data.status === 'countered') {
-          // AI Countered!
-          setCurrentBid(data.highestBid);
-          setHighestBidder(data.highestBidder);
-          setBidLog(prev => [data.message, ...prev]);
-          setTimer(10); // Reset timer 
-          setActionLocked(false);
-          startTimer();
-        } else if (data.status === 'won') {
-          // User Won - No counters
-          setBidLog(prev => [`No counters. Going once...`, ...prev]);
-          setTimer(3); // Fast track the sold timer to 3 seconds
-          startTimer();
-          // Action stays locked
-        } else if (data.error) {
-           alert(data.error);
-           setActionLocked(false);
-           startTimer();
-        }
-      }, 800);
-    } catch (e) { 
-      console.error(e);
-      setActionLocked(false);
-      startTimer();
-    }
+        aiTimeoutRef.current = setTimeout(() => {
+           if (!biddingActive) return;
+           placeBid(evaluatorName, decision.amount);
+           setAiThinkingTeam(null);
+        }, timeout);
+     } else {
+        // AI passed... queue another Evaluation slightly later if timer isn't dead
+        aiTimeoutRef.current = setTimeout(() => {
+           triggerAIEvaluation(currentWinningTeam, currentPrice);
+        }, 800);
+     }
   };
 
-  const handlePass = () => {
-    if (actionLocked) return;
-    if (highestBidder === session.userTeam) {
-      alert("You cannot pass. You hold the highest bid!");
-      return;
-    }
+  const placeBid = (teamName, amount) => {
+    setCurrentBid(amount);
+    setHighestBidder(teamName);
     
-    // User passes. The timer fast tracks to 0.
-    setActionLocked(true);
-    clearInterval(timerRef.current);
-    setBidLog(prev => [`You passed on ${player.name}.`, ...prev]);
-    handleTimerEnd();
+    // Reset timer back heavily to simulate auctioneer waiting for counter
+    setTimer(prev => prev < 10 ? 10 : 15);
+    
+    // Log color magic
+    const tColor = teamName === userState.name ? '#10b981' : aiTeams[teamName]?.color || '#ffffff';
+    addLog(`⭐ ${teamName} raised the bid to ₹${amount.toFixed(2)} Cr!`, tColor);
+
+    startTimer(); // Restart pulse
+
+    if (teamName === userState.name) {
+       // Stop manual evaluation, wait for AI
+       triggerAIEvaluation(teamName, amount);
+    } else {
+       // An AI just bid. Another AI might counter!
+       triggerAIEvaluation(teamName, amount);
+    }
   };
 
-  if (!session || loading && !player) {
-    return (
-      <div className="dash-v2">
-        <Navbar /><div style={{paddingTop: '150px', textAlign: 'center'}}><h2>Loading Auction Table...</h2></div>
-      </div>
-    );
-  }
+  const userRaise = (increment) => {
+    if (!biddingActive) return;
+    const newBid = highestBidder === 'None' ? (currentPlayer.basePrice/100) : currentBid + increment;
+    if (userState.purse < newBid) return alert("Insufficient Purse!");
+    
+    clearTimeout(aiTimeoutRef.current);
+    placeBid(userState.name, newBid);
+  };
 
-  // Next Bid Cost
-  const nextBidDisplay = highestBidder === 'None' ? player?.basePrice : (currentBid + 0.5);
+  if (!initFinished || !userState || !currentPlayer) return <div style={{background: '#0f172a', height: '100vh', color:'white', display:'flex', alignItems:'center', justifyContent:'center'}}>Entering Auction Room...</div>;
 
-  if (auctionOver) {
-    return (
-      <div className="dash-v2">
-        <Navbar />
-        <div className="dash-inner" style={{paddingTop: '100px', textAlign: 'center'}}>
-           <h2>Auction Completed!</h2>
-           <p style={{marginTop: '20px', color: 'var(--text-secondary)'}}>You have purchased {session?.squad?.length} players.</p>
-           
-           <div style={{maxWidth: '800px', margin: '40px auto', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '20px'}}>
-              <h3 style={{marginBottom: '20px'}}>Your Final Squad</h3>
-              {session?.squad?.length === 0 ? <p>No players purchased.</p> : (
-                 <ul style={{listStyle: 'none', padding: 0}}>
-                    {session.squad.map((p, i) => (
-                      <li key={i} style={{display:'flex', justifyContent:'space-between', padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
-                        <span>{p.name} ({p.role})</span>
-                        <strong style={{color: 'var(--accent-green)'}}>₹ {p.price} Cr</strong>
-                      </li>
-                    ))}
-                 </ul>
-              )}
-           </div>
-           <button onClick={() => router.push('/mockauction')} className="btn-primary">Return to Lobby</button>
-        </div>
-      </div>
-    );
-  }
+  const DASH_ARRAY = 283;
+  const dashOffset = DASH_ARRAY - (DASH_ARRAY * timer) / 15;
 
   return (
-    <div className="dash-v2 auction-room">
-      <Head>
-        <title>Live Auction | Cricket Decoded</title>
-      </Head>
+    <div className="auction-room-v2">
+      <Head><title>Live Auction | V2 Engine</title></Head>
 
-      <Navbar />
+      {/* TOP NAV MINI */}
+      <div className="room-nav">
+         <div style={{fontWeight: 900, fontStyle: 'italic', color: '#10b981'}}>Cricket<span style={{color:'white'}}>Decoded</span></div>
+         <div style={{fontSize: '0.8rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '2px'}}>Mock Auction 2026 Simulator</div>
+         <button onClick={() => router.push('/')} className="exit-btn">Exit Lobby</button>
+      </div>
 
-      <main className="dash-inner" style={{ paddingTop: '100px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '30px', alignItems: 'start' }}>
-          
-          {/* LEFT: AUCTION TABLE */}
-          <div className="auction-main-col">
-            <div className="preview-mock">
-              <div className="mock-header">
-                <div className="mock-timer" style={{ color: timer <= 5 ? 'var(--red)' : 'var(--green)' }}>
-                  0:{timer < 10 ? `0${timer}` : timer}
-                  <span>Bidding closes</span>
-                </div>
-                <div className="mock-purse">
-                  <div className="mock-purse-label">Your Purse Remaining</div>
-                  <div className="mock-purse-val">₹ {session.purse.toFixed(1)} Cr</div>
-                </div>
+      <div className="auction-3-col">
+        
+        {/* LEFT: USER SQUAD */}
+        <aside className="left-panel">
+           <div className="panel-inner glass-sub">
+              <div className="user-header">
+                 <img src={`/teams/${userState.name.toLowerCase()}.png`} alt={userState.name} style={{width:'50px', height:'50px', filter:'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'}} />
+                 <div style={{marginLeft: '15px'}}>
+                    <div style={{fontSize: '0.85rem', color: '#94a3b8', textTransform: 'uppercase'}}>{userState.name} Purse</div>
+                    <div style={{fontSize: '1.6rem', fontWeight: 900, color: '#f59e0b'}}>₹{userState.purse.toFixed(2)}</div>
+                 </div>
               </div>
 
-              {player && (
-                <div className="mock-player">
-                  <div className="player-avatar">{player.name.substring(0,2).toUpperCase()}</div>
-                  <div className="player-info">
-                    <div className="player-name">{player.name}</div>
-                    <div className="player-role">{player.role} · {player.nationality}</div>
-                  </div>
-                  <div className="player-base">
-                    Current Bid<br/>
-                    <strong style={{ color: highestBidder === session.userTeam ? 'var(--green)' : 'var(--gold)' }}>
-                      ₹ {currentBid.toFixed(1)} Cr
-                    </strong>
-                    <div style={{fontSize: '0.75rem', marginTop: '2px', color: 'rgba(255,255,255,0.5)'}}>
-                      Bidder: {highestBidder}
-                    </div>
-                  </div>
-                </div>
+              <div className="squad-breakdown">
+                 <div style={{display:'flex', justifyContent: 'space-between', marginBottom: '15px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
+                    <span style={{color: '#cbd5e1', fontWeight: 600}}>RTM Cards:</span>
+                    <span style={{display: 'flex', gap: '5px'}}>
+                      {Array.from({length: userState.rtmCards}).map((_, i) => <span key={i} style={{background: '#10b981', color: '#fff', borderRadius: '4px', padding: '2px 6px', fontSize: '0.7rem', fontWeight: 900}}>RTM</span>)}
+                    </span>
+                 </div>
+
+                 <div className="squad-list">
+                    <h4 style={{fontSize: '0.8rem', color: '#64748b', marginBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '5px'}}>Squad ({userState.squad.length}/25)</h4>
+                    <ul style={{listStyle:'none', margin:0, padding:0, maxHeight: '60vh', overflowY: 'auto'}}>
+                       {userState.squad.map((p, i) => (
+                         <li key={i} style={{padding: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '6px', marginBottom: '5px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <div>
+                               <div style={{fontSize: '0.8rem', fontWeight: 600, color: '#fff'}}>{p.name}</div>
+                               <div style={{fontSize: '0.65rem', color: '#94a3b8'}}>{p.role}</div>
+                            </div>
+                            <div style={{fontSize: '0.75rem', fontWeight: 800, color: '#f59e0b'}}>₹{p.price}</div>
+                         </li>
+                       ))}
+                    </ul>
+                 </div>
+              </div>
+           </div>
+        </aside>
+
+        {/* CENTER: PODIUM */}
+        <main className="center-panel">
+          
+           <div className="podium-header">
+              <span className="set-badge">SET {currentSet} — {currentSet === 1 ? 'MARQUEE' : currentSet === 2 ? 'OVERSEAS' : 'CAPPED'}</span>
+              <span className="queue-status">{playerQueue.length} Players Left</span>
+           </div>
+
+           <div className={`podium-card ${overlayMsg ? 'msg-active' : ''}`}>
+              <div className="svg-timer-box">
+                 <svg viewBox="0 0 100 100" style={{width: '90px', height: '90px', transform: 'rotate(-90deg)'}}>
+                    <circle cx="50" cy="50" r="45" fill="black" stroke="rgba(255,255,255,0.1)" strokeWidth="6" />
+                    <path
+                      strokeDasharray="283"
+                      strokeDashoffset={dashOffset}
+                      stroke={timer <= 5 ? '#ef4444' : '#10b981'}
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      fill="none"
+                      style={{transition: 'stroke-dashoffset 1s linear, stroke 0.3s'}}
+                      d="M 50, 50 m -45, 0 a 45,45 0 1,0 90,0 a 45,45 0 1,0 -90,0"
+                    />
+                    <text x="50" y="50" transform="rotate(90 50 50)" textAnchor="middle" dy=".3em" fill="white" fontSize="28" fontWeight="900" fontFamily="Playfair Display">
+                       0:{timer < 10 ? `0${timer}` : timer}
+                    </text>
+                 </svg>
+              </div>
+
+              {overlayMsg && (
+                 <div className="auction-overlay" style={{background: overlayMsg === 'SOLD' ? 'rgba(16,185,129,0.95)' : 'rgba(239,68,68,0.95)'}}>
+                    {overlayMsg === 'SOLD' ? `SOLD TO ${highestBidder} 🔨` : 'UNSOLD ❌'}
+                 </div>
               )}
 
-              <div className="mock-bid-row">
-                <button 
-                  className="bid-btn raise" 
-                  onClick={handleRaise}
-                  disabled={actionLocked || highestBidder === session.userTeam || session.purse < nextBidDisplay}
-                  style={{ opacity: (actionLocked || highestBidder === session.userTeam) ? 0.5 : 1 }}
-                >
-                  ⬆ Raise to ₹ {nextBidDisplay.toFixed(1)} Cr
-                </button>
-                <button 
-                  className="bid-btn pass" 
-                  onClick={handlePass}
-                  disabled={actionLocked || highestBidder === session.userTeam}
-                >
-                  Pass
-                </button>
+              <div className="player-halo">
+                 <img src={currentPlayer.imageUrl} alt={currentPlayer.name} onError={(e)=>{e.target.src="https://ui-avatars.com/api/?name="+currentPlayer.name+"&background=1DB954&color=fff"}} />
+              </div>
+              
+              <h1 className="plyr-name">{currentPlayer.name}</h1>
+              <div className="plyr-badges">
+                 <span className="role-tag">{currentPlayer.role}</span>
+                 <span className="nat-tag">{currentPlayer.nationality === 'India' ? '🇮🇳 Indian' : '✈️ Overseas'}</span>
               </div>
 
-              <div className="mock-opponents">
-                {['MI', 'CSK', 'KKR', 'RCB'].filter(t => t !== session.userTeam).slice(0, 3).map((team) => (
-                  <div key={team} className="opp-chip" style={{ borderColor: highestBidder === team ? 'var(--red)' : 'rgba(255,255,255,0.06)' }}>
-                    <div className="opp-name">{team}</div>
-                    <div className={`opp-bid ${highestBidder === team ? 'active' : ''}`}>{highestBidder === team ? 'Highest' : 'Waiting'}</div>
-                  </div>
-                ))}
+              <div className="plyr-stats-strip">
+                 <div className="st-item"><span className="st-val">{currentPlayer.stats.matches}</span><span className="st-lbl">Mats</span></div>
+                 {currentPlayer.role.includes('Bowler') && <div className="st-item"><span className="st-val">{currentPlayer.stats.wickets}</span><span className="st-lbl">Wkts</span></div>}
+                 {(currentPlayer.role.includes('Batter') || currentPlayer.role.includes('All')) && <div className="st-item"><span className="st-val">{currentPlayer.stats.runs}</span><span className="st-lbl">Runs</span></div>}
+                 <div className="st-item"><span className="st-val">{currentPlayer.stats.avg}</span><span className="st-lbl">Avg</span></div>
+                 <div className="st-item"><span className="st-val">{currentPlayer.stats.sr}</span><span className="st-lbl">SR / Ec</span></div>
               </div>
-            </div>
-          </div>
 
-          {/* RIGHT: LOGS & SQUAD / ADS */}
-          <div className="auction-side-col">
-             <div className="glass-panel" style={{ padding: '20px', marginBottom: '20px', maxHeight: '300px', overflowY: 'auto' }}>
-                <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '15px' }}>Live Events</h3>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.9rem' }}>
-                   {bidLog.map((log, i) => (
-                     <li key={i} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)', color: i === 0 ? '#fff' : 'rgba(255,255,255,0.6)' }}>
-                       {log}
-                     </li>
-                   ))}
-                </ul>
-             </div>
+              <div className="live-bid-display">
+                 <div className="lbd-title">Current Bid</div>
+                 <div className="lbd-val" style={{color: highestBidder === userState.name ? '#10b981' : (highestBidder === 'None' ? '#fff' : '#f59e0b')}}>
+                    ₹ {currentBid.toFixed(2)} Cr
+                 </div>
+                 {highestBidder !== 'None' && (
+                    <div className="lbd-team">
+                       Leading: <span style={{fontWeight: 800, padding: '2px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.1)'}}>{highestBidder}</span>
+                    </div>
+                 )}
+              </div>
+           </div>
 
-             <AdComponent slotId="sidebar-auction" />
-          </div>
+           <div className="action-buttons">
+              <button onClick={() => userRaise(0.25)} disabled={!biddingActive || highestBidder === userState.name} className="bb primary">
+                 ⬆ Raise ₹0.25 Cr
+              </button>
+              <button onClick={() => userRaise(0.50)} disabled={!biddingActive || highestBidder === userState.name} className="bb primary">
+                 ⬆ Raise ₹0.50 Cr
+              </button>
+              {userState.rtmCards > 0 && highestBidder !== 'None' && highestBidder !== userState.name && currentPlayer.previousTeam === userState.name && (
+                <button 
+                  onClick={() => { placeBid(userState.name, currentBid); setUserState(prev => ({...prev, rtmCards: prev.rtmCards - 1})); }} 
+                  disabled={!biddingActive} 
+                  className="bb rtm"
+                >
+                  🃏 Match with RTM
+                </button>
+              )}
+           </div>
 
-        </div>
-      </main>
+           <div className="bottom-log" ref={logRef}>
+              {logs.map(log => (
+                <div key={log.id} style={{color: log.color, marginBottom: '6px', fontSize: '0.85rem', fontWeight: 600}}>
+                   {log.msg}
+                </div>
+              ))}
+           </div>
+        </main>
+
+        {/* RIGHT: AI STATUS */}
+        <aside className="right-panel">
+           <div className="panel-inner glass-sub">
+              <h3 style={{fontSize: '0.9rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '15px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
+                 Live Franchises
+              </h3>
+              <div className="franchise-list">
+                 {Object.keys(aiTeams).map(t => {
+                   const ai = aiTeams[t];
+                   const isWinning = highestBidder === t;
+                   const isThinking = aiThinkingTeam === t;
+                   return (
+                     <div key={t} className={`ai-card ${isWinning ? 'winning' : ''}`} style={{'--ai-col': ai.color || '#fff'}}>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                           <img src={`/teams/${t.toLowerCase()}.png`} alt={t} style={{width: '32px', height: '32px'}} />
+                           <div>
+                              <div style={{fontSize: '0.8rem', fontWeight: 800, color: '#fff'}}>{t}</div>
+                              <div style={{fontSize: '0.7rem', color: '#cbd5e1'}}>₹{Math.max(0, ai.purse).toFixed(2)} · {ai.squad.length}/25</div>
+                           </div>
+                        </div>
+                        {isWinning && <div className="ai-badge w">Highest</div>}
+                        {isThinking && <div className="ai-badge t">...</div>}
+                     </div>
+                   );
+                 })}
+              </div>
+           </div>
+        </aside>
+
+      </div>
 
       <style jsx>{`
-        /* Reuse CSS from the provided landing page sneak peek */
-        .preview-mock {
-          background: #0d0d0d;
-          border-radius: 22px;
-          padding: 30px;
-          box-shadow: 0 40px 80px rgba(0,0,0,0.3);
-          position: relative;
+        .auction-room-v2 {
+          background: #0f172a;
+          min-height: 100vh;
+          font-family: 'DM Sans', sans-serif;
+          color: white;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.05);
         }
-        .preview-mock::before {
-          content: ''; position: absolute; top: -60px; right: -60px;
-          width: 300px; height: 300px;
-          background: radial-gradient(circle, rgba(29,185,84,0.15) 0%, transparent 70%);
+        .room-nav {
+          height: 60px; background: #020617; border-bottom: 1px solid rgba(255,255,255,0.05);
+          display: flex; align-items: center; justify-content: space-between; padding: 0 30px;
         }
-        .mock-header {
-          display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; position: relative; z-index: 10;
+        .exit-btn {
+          background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8;
+          padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
         }
-        .mock-timer {
-          font-family: 'Playfair Display', serif;
-          font-size: 36px; font-weight: 900;
-          transition: color 0.3s;
-        }
-        .mock-timer span { font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.4); display: block; font-family: 'DM Sans', sans-serif; }
-        .mock-purse { text-align: right; }
-        .mock-purse-label { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.08em; text-transform: uppercase; }
-        .mock-purse-val { font-size: 22px; font-weight: 700; color: #f0a500; }
+        .exit-btn:hover { background: rgba(255,255,255,0.05); color: white; }
 
-        .mock-player {
-          background: rgba(255,255,255,0.04); border-radius: 14px; padding: 20px;
-          display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
-          border: 1px solid rgba(255,255,255,0.06);
-          position: relative; z-index: 10;
+        .auction-3-col {
+          display: grid;
+          grid-template-columns: 280px 1fr 280px;
+          height: calc(100vh - 60px);
         }
-        .player-avatar {
-          width: 52px; height: 52px; border-radius: 12px;
-          background: linear-gradient(135deg, #1DB954, #17a046);
+        .panel-inner { height: 100%; padding: 20px; overflow-y: auto; background: rgba(255,255,255,0.01); border-right: 1px solid rgba(255,255,255,0.05); }
+        .right-panel .panel-inner { border-right: none; border-left: 1px solid rgba(255,255,255,0.05); }
+
+        .user-header { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; display: flex; align-items: center; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
+
+        .center-panel {
+          padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+          background: radial-gradient(circle at 50% -20%, rgba(16,185,129,0.05) 0%, transparent 60%);
+          position: relative;
+        }
+
+        .podium-header { width: 100%; max-width: 600px; display: flex; justify-content: space-between; margin-bottom: 25px; }
+        .set-badge { font-size: 0.75rem; font-weight: 800; color: #10b981; letter-spacing: 2px; }
+        .queue-status { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+
+        .podium-card {
+          width: 100%; max-width: 600px; background: #1e293b;
+          border-radius: 24px; padding: 40px; text-align: center;
+          position: relative; border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+          overflow: hidden;
+        }
+        .svg-timer-box { position: absolute; top: 20px; left: 20px; }
+
+        .auction-overlay {
+          position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 50;
           display: flex; align-items: center; justify-content: center;
-          font-size: 20px; font-weight: 900; color: white;
-          flex-shrink: 0;
+          font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; color: white;
+          text-shadow: 0 4px 10px rgba(0,0,0,0.5); animation: stampIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
         }
-        .player-info { flex: 1; }
-        .player-name { font-size: 18px; font-weight: 700; color: white; margin-bottom: 3px; }
-        .player-role { font-size: 13px; color: rgba(255,255,255,0.5); }
-        .player-base { font-size: 13px; color: rgba(255,255,255,0.5); text-align: right; }
-        .player-base strong { font-size: 18px; display: block; margin-top: 2px; }
+        @keyframes stampIn { 0%{opacity:0;transform:scale(1.5) rotate(-10deg);} 100%{opacity:1;transform:scale(1) rotate(-5deg);} }
 
-        .mock-bid-row { display: flex; gap: 10px; margin-bottom: 20px; position: relative; z-index: 10; }
-        .bid-btn {
-          flex: 1; padding: 16px; border-radius: 12px; border: none; cursor: pointer;
-          font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif;
-          transition: transform 0.15s, opacity 0.15s;
+        .player-halo { width: 160px; height: 160px; margin: 0 auto 20px; background: rgba(0,0,0,0.2); border-radius: 50%; padding: 6px; border: 2px dashed rgba(255,255,255,0.1); }
+        .player-halo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; opacity: 0; animation: fadeImg 0.5s ease forwards; }
+        @keyframes fadeImg { to{opacity:1;} }
+        
+        .plyr-name { font-family: 'Playfair Display', serif; font-size: 2.4rem; font-weight: 900; line-height: 1; margin-bottom: 15px; color: white; }
+        .plyr-badges { display: flex; justify-content: center; gap: 8px; margin-bottom: 25px; }
+        .role-tag, .nat-tag { padding: 4px 10px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: rgba(255,255,255,0.05); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); }
+        .role-tag { color: #f59e0b; border-color: rgba(245,158,11,0.2); }
+
+        .plyr-stats-strip {
+          display: flex; justify-content: center; gap: 30px; margin-bottom: 30px;
+          background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px;
         }
-        .bid-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
-        .bid-btn:disabled { cursor: not-allowed; }
-        .bid-btn.raise { background: #1DB954; color: white; }
-        .bid-btn.pass { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); }
+        .st-item { display: flex; flex-direction: column; }
+        .st-val { font-size: 1.2rem; font-weight: 800; color: white; margin-bottom: 4px; }
+        .st-lbl { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
 
-        .mock-opponents { display: flex; gap: 12px; position: relative; z-index: 10; }
-        .opp-chip {
-          flex: 1; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px 8px;
-          text-align: center; border: 1px solid rgba(255,255,255,0.06);
-          transition: border-color 0.3s;
+        .live-bid-display {
+           background: rgba(0,0,0,0.4); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);
         }
-        .opp-name { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
-        .opp-bid { font-size: 14px; font-weight: 700; color: white; margin-top: 4px; }
-        .opp-bid.active { color: #e63946; }
+        .lbd-title { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+        .lbd-val { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 900; line-height: 1; margin-bottom: 10px; transition: color 0.3s; }
+        .lbd-team { font-size: 0.85rem; color: #cbd5e1; }
 
-        @media (max-width: 900px) {
-           .auction-room .dash-inner > div { grid-template-columns: 1fr !important; }
+        .action-buttons {
+          width: 100%; max-width: 600px; display: flex; gap: 15px; margin-top: 25px;
+        }
+        .bb { flex: 1; padding: 18px; border-radius: 14px; font-weight: 800; font-size: 0.9rem; cursor: pointer; border: none; transition: all 0.2s; font-family: 'DM Sans', sans-serif;}
+        .bb:disabled { opacity: 0.4; cursor: not-allowed; }
+        .bb.primary { background: #10b981; color: white; box-shadow: 0 10px 20px rgba(16,185,129,0.2); }
+        .bb.primary:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
+        .bb.rtm { background: transparent; border: 2px solid #f59e0b; color: #f59e0b; }
+        .bb.rtm:hover:not(:disabled) { background: #f59e0b; color: white; }
+
+        .bottom-log {
+          width: 100%; max-width: 600px; margin-top: 25px; height: 100px;
+          background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px;
+          overflow-y: auto; text-align: left;
+          scrollbar-width: none;
+        }
+        .bottom-log::-webkit-scrollbar { display: none; }
+
+        .ai-card {
+           display: flex; align-items: center; justify-content: space-between;
+           background: rgba(255,255,255,0.02); padding: 12px; border-radius: 10px; margin-bottom: 10px;
+           border: 1px solid rgba(255,255,255,0.03); transition: all 0.3s;
+        }
+        .ai-card.winning { border-color: var(--ai-col); background: rgba(255,255,255,0.06); box-shadow: 0 0 15px rgba(255,255,255,0.05); }
+        .ai-badge { font-size: 0.65rem; font-weight: 800; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; }
+        .ai-badge.w { background: var(--ai-col); color: black; }
+        .ai-badge.t { background: #f59e0b; color: white; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { from{opacity:0.5;} to{opacity:1;} }
+
+        @media (max-width: 1100px) {
+           .auction-3-col { grid-template-columns: 1fr; height: auto; }
+           .center-panel { min-height: 80vh; }
+           .right-panel { display: none; }
         }
       `}</style>
     </div>
