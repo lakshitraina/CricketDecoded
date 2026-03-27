@@ -49,6 +49,12 @@ export default function MockAuctionV2() {
   const timerRef = useRef(null);
   const logRef = useRef(null);
   const aiTimeoutRef = useRef(null);
+  
+  // Safe Ref for resolving stale closures in setInterval
+  const stateRef = useRef({ currentPlayer: null, currentBid: 0, highestBidder: 'None' });
+  useEffect(() => {
+     stateRef.current = { currentPlayer, currentBid, highestBidder };
+  }, [currentPlayer, currentBid, highestBidder]);
 
   useEffect(() => {
     const rawState = localStorage.getItem('auction_v2_state');
@@ -123,27 +129,33 @@ export default function MockAuctionV2() {
     setAiThinkingTeam(null);
     clearInterval(timerRef.current);
 
-    if (highestBidder === 'None') {
+    const cp = stateRef.current.currentPlayer;
+    const cb = stateRef.current.currentBid;
+    const hb = stateRef.current.highestBidder;
+
+    if (!cp) return;
+
+    if (hb === 'None') {
        setOverlayMsg('UNSOLD');
-       addLog(`UNSOLD - No bids for ${currentPlayer.name}.`, '#ef4444');
+       addLog(`UNSOLD - No bids for ${cp.name}.`, '#ef4444');
     } else {
        setOverlayMsg('SOLD');
-       addLog(`SOLD! ${currentPlayer.name} to ${highestBidder} for ₹${currentBid.toFixed(2)} Cr!`, '#10b981');
+       addLog(`SOLD! ${cp.name} to ${hb} for ₹${cb.toFixed(2)} Cr!`, '#10b981');
        
-       // Deduct Purse & Add to Squad
-       if (highestBidder === userState.name) {
+       // Deduct Purse & Add to Squad safely via functional updates
+       if (hb === userState.name) {
          setUserState(prev => ({
            ...prev,
-           purse: prev.purse - currentBid,
-           squad: [...prev.squad, { ...currentPlayer, price: currentBid }]
+           purse: prev.purse - cb,
+           squad: [...prev.squad, { ...cp, price: cb }]
          }));
        } else {
          setAiTeams(prev => ({
            ...prev,
-           [highestBidder]: {
-              ...prev[highestBidder],
-              purse: prev[highestBidder].purse - currentBid,
-              squad: [...prev[highestBidder].squad, { ...currentPlayer, price: currentBid }]
+           [hb]: {
+              ...prev[hb],
+              purse: prev[hb].purse - cb,
+              squad: [...(prev[hb].squad || []), { ...cp, price: cb }]
            }
          }));
        }
@@ -311,7 +323,11 @@ export default function MockAuctionV2() {
               )}
 
               <div className="player-halo">
-                 <img src={currentPlayer.imageUrl} alt={currentPlayer.name} onError={(e)=>{e.target.src="https://ui-avatars.com/api/?name="+currentPlayer.name+"&background=1DB954&color=fff"}} />
+                 <img 
+                   src={currentPlayer.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentPlayer.name)}&background=1DB954&color=fff`} 
+                   alt={currentPlayer.name} 
+                   onError={(e)=>{e.target.src=`https://ui-avatars.com/api/?name=${encodeURIComponent(currentPlayer.name)}&background=1DB954&color=fff`}} 
+                 />
               </div>
               
               <h1 className="plyr-name">{currentPlayer.name}</h1>

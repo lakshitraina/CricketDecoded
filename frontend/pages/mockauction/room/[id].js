@@ -575,7 +575,11 @@ function LiveAuctionRoom({ roomId, room, user }) {
                     )}
 
                     <div className="player-halo">
-                       <img src={state.currentPlayer.imageUrl} alt={state.currentPlayer.name} onError={(e)=>{e.target.src="https://ui-avatars.com/api/?name="+state.currentPlayer.name+"&background=1DB954&color=fff"}} />
+                       <img 
+                         src={state.currentPlayer.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(state.currentPlayer.name)}&background=1DB954&color=fff`} 
+                         alt={state.currentPlayer.name} 
+                         onError={(e)=>{e.target.src=`https://ui-avatars.com/api/?name=${encodeURIComponent(state.currentPlayer.name)}&background=1DB954&color=fff`}} 
+                       />
                     </div>
                     <h1 className="plyr-name">{state.currentPlayer.name}</h1>
                     <div className="plyr-badges">
