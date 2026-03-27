@@ -5,30 +5,28 @@ require('dotenv').config();
 const seedMatchBlog = async () => {
   try {
     const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/cricklytics';
-    console.log("Connecting to:", uri.split('@')[1] || "Localhost");
-    
     await mongoose.connect(uri);
     
     const blogData = {
       title: "Tomorrow IPL Match 2026 – Match Prediction, Playing 11, Pitch Report",
       slug: "tomorrow-ipl-match-2026-prediction",
       category: "prediction",
-      keywords: "Tomorrow IPL match 2026, RCB vs SRH prediction, IPL 2026 Match 1, Chinnaswamy pitch report, IPL 2026 playing 11",
+      keywords: "Tomorrow IPL match 2026, RCB vs SRH prediction, IPL 2026 Match 1, Chinnaswamy pitch report, IPL 2026 playing 11, winner prediction",
       content: `
-        <p>The wait is finally over! The 19th edition of the Indian Premier League kicks off tomorrow with a blockbuster "South Indian Derby." As the defending champions take the field at their home fortress, fans are gearing up for what promises to be a high-octane season opener.</p>
+        <p>The long wait for the 19th edition of the Indian Premier League is finally over! Tomorrow, March 28, 2026, the cricket world turns its eyes toward the M. Chinnaswamy Stadium. This isn't just any season opener; it’s a high-stakes "South Indian Derby" featuring the reigning champions, Royal Challengers Bengaluru (RCB), as they begin their title defense against the most explosive batting unit in the league, the Sunrisers Hyderabad (SRH).</p>
         
-        <h2>Tomorrow Match Details</h2>
+        <h2>Match Details</h2>
         <ul>
           <li><strong>Match:</strong> RCB vs SRH</li>
-          <li><strong>Date:</strong> March 28, 2026</li>
+          <li><strong>Tournament:</strong> IPL 2026, Match 1</li>
           <li><strong>Venue:</strong> M. Chinnaswamy Stadium, Bengaluru</li>
         </ul>
 
-        <h2>Pitch Report</h2>
-        <p>The M. Chinnaswamy Stadium is a paradise for batters. Short boundaries and a lightning-fast outfield make 200+ scores frequent.</p>
+        <h2>Tactical Analysis</h2>
+        <p>RCB returns as defending champions with Rajat Patidar leading a balanced squad. SRH, under Ishan Kishan, relies on the 'total-attack' mindset of Head, Abhishek, and Klaasen.</p>
 
-        <h2>Final Prediction</h2>
-        <p>RCB holds a slight edge (58% win probability) due to their home advantage and deeper batting lineup. Winner Prediction: <strong>Royal Challengers Bengaluru</strong> to win a close encounter.</p>
+        <h2>Final Verdict</h2>
+        <p>RCB holds the home advantage and a 54% win probability according to the Google Predictor. Prediction: <strong>Royal Challengers Bengaluru</strong> to win a high-scoring thriller.</p>
       `
     };
 
@@ -38,7 +36,7 @@ const seedMatchBlog = async () => {
       { upsert: true, new: true }
     );
 
-    console.log("✅ Match Prediction Blog Seeded Successfully!");
+    console.log("✅ Detailed Match Prediction Blog Seeded Successfully!");
     process.exit(0);
   } catch (error) {
     console.error("❌ Seeding Error:", error);
