@@ -44,6 +44,21 @@ const seedMatchBlog = async () => {
 
           <p>Download the high-resolution, official match list for your phone or desktop using our premium fixtures hub.</p>
         `
+      },
+      {
+        title: "Josh Hazlewood IPL 2026 Performance, Stats & Team Analysis",
+        slug: "josh-hazlewood-ipl-2026-stats-performance",
+        category: "analysis",
+        keywords: "Josh Hazlewood IPL 2026 stats, Hazlewood RCB price, Hazlewood injury update IPL, Josh Hazlewood bowling record",
+        content: `
+          <p>As Royal Challengers Bengaluru (RCB) prepare to defend their maiden title in IPL 2026, all eyes are on their pace spearhead, Josh Hazlewood. After a career-defining 2025 season where he led the franchise to glory, "The Hoff" remains the backbone of the RCB bowling attack.</p>
+          
+          <h2>Injury Update</h2>
+          <p>As of March 27, 2026, Josh Hazlewood has officially joined the RCB camp. However, he is likely to miss the season opener against SRH due to minor hamstring and Achilles issues.</p>
+
+          <h2>Team Impact</h2>
+          <p>Hazlewood’s metronomic accuracy and steep bounce make him one of the most difficult bowlers to score against, especially at the high-scoring M. Chinnaswamy Stadium.</p>
+        `
       }
     ];
 
