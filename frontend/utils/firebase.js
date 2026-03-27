@@ -14,9 +14,9 @@ const firebaseConfig = {
   databaseURL: process.env.NEXT_PUBLIC_FB_DATABASE_URL
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const app = !getApps().length && firebaseConfig.apiKey ? initializeApp(firebaseConfig) : (getApps().length ? getApp() : null);
 
-export const auth = getAuth(app);
+export const auth = app ? getAuth(app) : null;
 export const googleProvider = new GoogleAuthProvider();
-export const db = getFirestore(app);
-export const rtdb = getDatabase(app);
+export const db = app ? getFirestore(app) : null;
+export const rtdb = app ? getDatabase(app) : null;
