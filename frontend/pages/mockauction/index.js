@@ -8,12 +8,22 @@ import { auth, googleProvider } from '../../utils/firebase';
 export default function MockAuctionLanding() {
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = React.useRef(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (usr) => {
       setUser(usr);
     });
-    return () => unsub();
+    
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowDropdown(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      unsub();
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const handleSignIn = async () => {
@@ -43,18 +53,35 @@ export default function MockAuctionLanding() {
       <nav>
         <Link href="/" className="nav-logo">Cricket<span>Decoded.</span></Link>
         <div style={{display:'flex', gap:'20px', alignItems:'center'}}>
-          {user ? (
-            <>
-               <button onClick={() => router.push('/mockauction/history')} className="btn-ghost">View History</button>
-               <img 
-                 src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=4285F4&color=fff`} 
-                 alt="Profile" 
-                 style={{width:'36px', height:'36px', borderRadius:'50%', objectFit: 'cover'}} 
-                 referrerPolicy="no-referrer"
-                 onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=4285F4&color=fff`}}
-               />
-               <button onClick={handleSignOut} className="btn-ghost" style={{color:'var(--red)'}}>Sign Out</button>
-            </>
+           {user ? (
+            <div style={{position: 'relative'}} ref={dropdownRef}>
+               <div onClick={() => setShowDropdown(!showDropdown)} style={{display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '5px 10px', borderRadius: '100px', transition: 'background 0.2s', background: showDropdown ? 'rgba(0,0,0,0.05)' : 'transparent'}}>
+                  <div style={{textAlign: 'right', display: 'none', md: 'block'}}>
+                     <div style={{fontSize: '0.85rem', fontWeight: 800, color: '#0f172a'}}>{user.displayName || 'User'}</div>
+                     <div style={{fontSize: '0.65rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px'}}>Active Session</div>
+                  </div>
+                  <img 
+                    src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=4285F4&color=fff`} 
+                    alt="Profile" 
+                    style={{width:'40px', height:'40px', borderRadius:'50%', objectFit: 'cover', border: '2px solid #fff', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}} 
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=4285F4&color=fff`}}
+                  />
+               </div>
+
+               {showDropdown && (
+                  <div className="glass-dropdown" style={{position: 'absolute', top: '55px', right: 0, width: '220px', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '15px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', border: '1px solid rgba(0,0,0,0.05)', zIndex: 1000}}>
+                     <div style={{padding: '10px', borderBottom: '1px solid #f1f5f9', marginBottom: '10px'}}>
+                        <div style={{fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '5px'}}>Account</div>
+                        <div style={{fontSize: '0.9rem', fontWeight: 800}}>{user.displayName}</div>
+                     </div>
+                     <button onClick={() => router.push('/mockauction/profile')} className="dd-item">👤 View Profile</button>
+                     <button onClick={() => router.push('/mockauction/history')} className="dd-item">📜 Match History</button>
+                     <div style={{height: '1px', background: '#f1f5f9', margin: '10px 0'}}></div>
+                     <button onClick={handleSignOut} className="dd-item" style={{color: '#ef4444'}}>🚪 Sign Out</button>
+                  </div>
+               )}
+            </div>
           ) : (
             <button onClick={handleSignIn} className="nav-cta" style={{background:'#4285F4'}}>
               <svg style={{width:'16px', height:'16px', marginRight:'8px', verticalAlign:'sub'}} viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
@@ -145,6 +172,12 @@ export default function MockAuctionLanding() {
         .btn-ghost:hover { background: rgba(0,0,0,0.05); }
         .nav-cta { padding: 10px 20px; border-radius: 100px; color: #fff; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; transition: transform 0.2s;}
         .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66,133,244,0.3); }
+
+        .dd-item { width: 100%; text-align: left; padding: 12px 15px; border: none; background: transparent; border-radius: 12px; font-size: 0.9rem; font-weight: 600; color: #475569; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+        .dd-item:hover { background: rgba(16,185,129,0.05); color: #10b981; }
+        .glass-dropdown { animation: ddFade 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
+        @keyframes ddFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
 
         .hero {
           min-height: 80vh; padding: 160px 24px 80px; text-align: center;

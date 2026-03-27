@@ -23,9 +23,16 @@ export default function MultiplayerLobby() {
     const [joinCode, setJoinCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [favTeam, setFavTeam] = useState(null);
 
     useEffect(() => {
-       const unsub = onAuthStateChanged(auth, u => setUser(u));
+       const unsub = onAuthStateChanged(auth, async (u) => {
+           setUser(u);
+           if (u) {
+               const snap = await get(ref(rtdb, `users/${u.uid}/prefs`));
+               if (snap.exists()) setFavTeam(snap.val().favTeam);
+           }
+       });
        return () => unsub();
     }, []);
 

@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Navbar from '../../components/Navbar';
 import { teamsData } from '../../data/teams';
 import { preRetentions } from '../../data/auctionPlayers';
+import { auth, rtdb } from '../../utils/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { ref, get } from 'firebase/database';
 
 const RETENTION_SLABS = [18, 14, 11, 18, 14, 4]; // In Crores
 
@@ -12,9 +15,25 @@ export default function AuctionSetup() {
   const [phase, setPhase] = useState('FRANCHISE'); // 'FRANCHISE' | 'RETENTION'
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [userRetentions, setUserRetentions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // For multiplayer placeholders
-  const [mode] = useState('CLASSIC');
+  useEffect(() => {
+     const unsub = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+           const snap = await get(ref(rtdb, `users/${user.uid}/prefs`));
+           if (snap.exists() && snap.val().favTeam) {
+              const team = snap.val().favTeam;
+              // Only auto-select if it's a valid team name
+              if (teamsData[team]) {
+                 setSelectedTeam(team);
+                 setPhase('RETENTION');
+              }
+           }
+        }
+        setLoading(false);
+     });
+     return () => unsub();
+  }, []);
 
   const startRetentionPhase = (teamName) => {
     setSelectedTeam(teamName);
@@ -78,7 +97,9 @@ export default function AuctionSetup() {
 
       <div className="dash-inner" style={{ paddingTop: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingBottom: '100px' }}>
         
-        {phase === 'FRANCHISE' && (
+        {loading ? (
+            <div style={{marginTop: '100px', fontSize: '1.2rem', color: '#64748b'}}>Syncing your preferences...</div>
+        ) : phase === 'FRANCHISE' ? (
           <>
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
               <span className="dash-badge" style={{background: 'var(--black)', color: 'var(--white)'}}>Step 1 of 2</span>
@@ -112,9 +133,7 @@ export default function AuctionSetup() {
               ))}
             </div>
           </>
-        )}
-
-        {phase === 'RETENTION' && (
+        ) : (
           <div style={{width: '100%', maxWidth: '1000px'}}>
              <div style={{ textAlign: 'center', marginBottom: '40px' }}>
               <span className="dash-badge" style={{background: 'var(--black)', color: 'var(--white)'}}>Step 2 of 2</span>

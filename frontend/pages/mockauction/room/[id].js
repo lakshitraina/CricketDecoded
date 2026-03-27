@@ -16,11 +16,18 @@ export default function MultiplayerRoomRoot() {
     
     const [room, setRoom] = useState(null);
     const [user, setUser] = useState(null);
+    const [favTeam, setFavTeam] = useState(null);
 
     useEffect(() => {
-        const unsubAuth = onAuthStateChanged(auth, u => {
+        const unsubAuth = onAuthStateChanged(auth, async (u) => {
             if (!u && router.isReady) router.push('/mockauction/lobby');
-            else setUser(u);
+            else {
+                setUser(u);
+                if (u) {
+                    const snap = await get(ref(rtdb, `users/${u.uid}/prefs`));
+                    if (snap.exists()) setFavTeam(snap.val().favTeam);
+                }
+            }
         });
         return () => unsubAuth();
     }, [router.isReady]);
@@ -44,7 +51,7 @@ export default function MultiplayerRoomRoot() {
     if (!room || !user) return <div style={{background: '#0f172a', height: '100vh', color: 'white', display:'flex', alignItems:'center', justifyContent:'center'}}>Loading Room Data...</div>;
 
     // Route to correct sub-component based on Room Status
-    if (room.status === 'LOBBY') return <WaitingLobby roomId={id} room={room} user={user} />;
+    if (room.status === 'LOBBY') return <WaitingLobby roomId={id} room={room} user={user} favTeam={favTeam} />;
     if (room.status === 'RETENTION') return <MultiplayerRetention roomId={id} room={room} user={user} />;
     if (room.status === 'AUCTION') return <LiveAuctionRoom roomId={id} room={room} user={user} />;
 
@@ -54,7 +61,7 @@ export default function MultiplayerRoomRoot() {
 // -------------------------------------------------------------
 // 1. WAITING LOBBY COMPONENT
 // -------------------------------------------------------------
-function WaitingLobby({ roomId, room, user }) {
+function WaitingLobby({ roomId, room, user, favTeam }) {
     const isHost = room.hostId === user.uid;
     const playersArr = Object.values(room.players || {});
     
@@ -137,6 +144,9 @@ function WaitingLobby({ roomId, room, user }) {
                               boxShadow: isMine ? '0 10px 20px rgba(16,185,129,0.1)' : '0 4px 6px rgba(0,0,0,0.02)'
                            }}
                          >
+                             {team.name === favTeam && !isTaken && (
+                                <div style={{position: 'absolute', top: '10px', right: '10px', background: 'rgba(16,185,129,0.1)', color: '#10b981', fontSize: '0.67rem', fontWeight: 900, padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(16,185,129,0.3)', zIndex: 2}}>RECOMMENDED</div>
+                             )}
                             <img src={`/teams/${team.name.toLowerCase()}.png`} style={{height: '60px', width: 'auto', marginBottom: '15px'}} />
                             <h4 style={{color: '#0f172a', fontWeight: 800, fontSize: '1.1rem'}}>{team.name}</h4>
                             
