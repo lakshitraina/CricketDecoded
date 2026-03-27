@@ -77,6 +77,24 @@ const seedMatchBlog = async () => {
 
           <p>Check the full players list and tactical analysis on our premium squad hub.</p>
         `
+      },
+      {
+        title: "IPL 2026 Ticket Booking – Prices, Dates & How to Book Online",
+        slug: "ipl-2026-ticket-booking-prices-how-to-book",
+        category: "tickets",
+        keywords: "IPL 2026 ticket booking, IPL 2026 ticket price, how to book IPL tickets, IPL 2026 online tickets",
+        content: `
+          <p>The cricket fever is back! With the IPL 2026 season kicking off tomorrow, March 28, 2026, fans are scrambling to secure their spots in the stadiums.</p>
+          
+          <h2>Booking Details</h2>
+          <ul>
+            <li><strong>Official Partners:</strong> JioHotstar, Paytm Insider, BookMyShow</li>
+            <li><strong>Price Range:</strong> ₹800 to ₹60,000+</li>
+            <li><strong>Dates:</strong> Booking live across all 10 iconic venues</li>
+          </ul>
+
+          <p>Check the full pricing table and step-by-step booking guide on our premium ticketing hub.</p>
+        `
       }
     ];
 
