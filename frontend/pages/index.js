@@ -170,6 +170,10 @@ export default function LandingPage({ matches, blogs }) {
              <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left-3"></iframe>
              <div style={{marginTop: '20px'}}></div>
              <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left-4"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left-5"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left-6"></iframe>
           </div>
           <div className="sidebar-ad right-sidebar">
              <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-1"></iframe>
@@ -187,6 +191,14 @@ export default function LandingPage({ matches, blogs }) {
              <iframe src="//www.highperformanceformat.com/watchnew?key=049ed5c6c01b883957767c887fde882d" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-7"></iframe>
              <div style={{marginTop: '20px'}}></div>
              <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=d60542bb90219e73c31c84525bd1da05" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-8"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-9"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7b63b4b297c7e53c1d003813c9724a13" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-10"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.highperformanceformat.com/watchnew?key=049ed5c6c01b883957767c887fde882d" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-11"></iframe>
+             <div style={{marginTop: '20px'}}></div>
+             <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=d60542bb90219e73c31c84525bd1da05" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-12"></iframe>
           </div>
 
           <div className="observe" style={{ textAlign: 'center', marginBottom: '3rem' }}>

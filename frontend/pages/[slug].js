@@ -46,8 +46,14 @@ export default function MatchPrediction({ match, error }) {
       <Ticker />
       <Navbar />
 
-      <main className="container" style={{ marginTop: '100px', paddingBottom: '60px', maxWidth: '800px' }}>
-        <article className="glass-panel" style={{ padding: '40px' }}>
+      <main className="container" style={{ marginTop: '100px', paddingBottom: '60px', maxWidth: '850px' }}>
+        
+        {/* TOP BANNER AD */}
+        <div style={{display: 'flex', justifyContent: 'center', marginBottom: '20px'}}>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=049ed5c6c01b883957767c887fde882d" width="728" height="90" frameBorder="0" scrolling="no" title="ad-top"></iframe>
+        </div>
+
+        <article className="glass-panel" style={{ padding: '40px', background: '#ffffff', color: '#000000', border: '1px solid #e2e8f0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)', borderRadius: '24px' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
              <h1 className="text-gradient" style={{ fontSize: '2.5rem' }}>{team1} vs {team2}</h1>
              <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', marginTop: '8px' }}>Match Prediction, Pitch Report & Fantasy Tips</p>
@@ -112,6 +118,16 @@ export default function MatchPrediction({ match, error }) {
             <Link href="/" legacyBehavior><a style={{ color: 'var(--accent-green)', textDecoration: 'underline', marginTop: '12px', display: 'inline-block' }}>Back to All Matches</a></Link>
           </div>
         </article>
+
+        {/* BOTTOM BANNER AD */}
+        <div style={{display: 'flex', justifyContent: 'center', marginTop: '40px'}}>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=11ced7a4967abfdc7f36246089b2f1d7" width="728" height="90" frameBorder="0" scrolling="no" title="ad-bottom"></iframe>
+        </div>
+
+        <style jsx>{`
+          .glass-panel h1, .glass-panel h2, .glass-panel h3 { color: #0f172a; }
+          .glass-panel p { color: #000000; }
+        `}</style>
       </main>
     </>
   );

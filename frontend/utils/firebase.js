@@ -4,14 +4,14 @@ import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDdHgj4J76HK57SQ2vRGZ7lq7pxGOCWWWw",
-  authDomain: "cricklytics-d023c.firebaseapp.com",
-  projectId: "cricklytics-d023c",
-  storageBucket: "cricklytics-d023c.firebasestorage.app",
-  messagingSenderId: "1022463560168",
-  appId: "1:1022463560168:web:b582085e62e984a4cffc5d",
-  measurementId: "G-YQ72TX3EB3",
-  databaseURL: "https://cricklytics-d023c-default-rtdb.firebaseio.com"
+  apiKey: process.env.NEXT_PUBLIC_FB_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FB_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FB_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FB_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FB_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FB_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FB_MEASUREMENT_ID,
+  databaseURL: process.env.NEXT_PUBLIC_FB_DATABASE_URL
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

@@ -51,14 +51,43 @@ export default function IPL2026Schedule() {
       <Navbar />
 
       <main className="match-hub-page">
-        {/* SIDEBAR ADS */}
         <div className="sidebar-ad left-sidebar">
-           <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left"></iframe>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-l1"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="600" frameBorder="0" scrolling="no" title="ad-l2"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-l3"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="600" frameBorder="0" scrolling="no" title="ad-l4"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-l5"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-l6"></iframe>
         </div>
         <div className="sidebar-ad right-sidebar">
-           <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right"></iframe>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r1"></iframe>
            <div style={{marginTop: '20px'}}></div>
-           <iframe src="//www.highperformanceformat.com/watchnew?key=7b63b4b297c7e53c1d003813c9724a13" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right-2"></iframe>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7b63b4b297c7e53c1d003813c9724a13" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r2"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=049ed5c6c01b883957767c887fde882d" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r3"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=d60542bb90219e73c31c84525bd1da05" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r4"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r5"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7b63b4b297c7e53c1d003813c9724a13" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r6"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=049ed5c6c01b883957767c887fde882d" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r7"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=d60542bb90219e73c31c84525bd1da05" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r8"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r9"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7b63b4b297c7e53c1d003813c9724a13" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r10"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.highperformanceformat.com/watchnew?key=049ed5c6c01b883957767c887fde882d" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r11"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=d60542bb90219e73c31c84525bd1da05" width="160" height="300" frameBorder="0" scrolling="no" title="ad-r12"></iframe>
         </div>
 
         <article className="hub-container">
@@ -174,11 +203,11 @@ export default function IPL2026Schedule() {
           position: relative;
         }
         
-        .sidebar-ad { position: fixed; top: 100px; width: 160px; z-index: 50; display: flex; flex-direction: column; align-items: center; }
-        .left-sidebar { left: calc(50% - 630px); }
-        .right-sidebar { right: calc(50% - 630px); }
-
-        @media (max-width: 1260px) { .sidebar-ad { display: none; } }
+        .sidebar-ad { position: sticky; top: 110px; width: 160px; z-index: 50; display: flex; flex-direction: column; align-items: center; }
+        .left-sidebar { float: left; margin-left: calc(50% - 680px); left: 0; }
+        .right-sidebar { float: right; margin-right: calc(50% - 680px); right: 0; }
+ 
+        @media (max-width: 1400px) { .sidebar-ad { display: none; } }
 
         .main-title { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 950; text-align: center; margin: 40px 0; letter-spacing: -1.5px; line-height: 1.1; }
         .section-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; margin: 40px 0 20px; text-align: center; }
