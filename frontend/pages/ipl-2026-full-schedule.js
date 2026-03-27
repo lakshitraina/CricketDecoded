@@ -72,9 +72,9 @@ export default function IPL2026Schedule() {
             <h1 className="main-title">IPL 2026 Full Schedule, Time Table, Fixtures & PDF Download</h1>
           </header>
 
-          <section className="hero-banner">
-             <img src="/ipl_2026_full_schedule_fixtures.png" alt="IPL 2026 Schedule" className="hero-img" />
-             <p className="img-caption">Official TATA IPL 2026 Match List & Venues</p>
+          <section className="hero-banner" style={{maxWidth: '450px', margin: '0 auto 40px'}}>
+             <img src="/ipl_2026_schedule_pdf_thumbnail.png" alt="IPL 2026 Schedule PDF" className="hero-img" />
+             <p className="img-caption">Official TATA IPL 2026 Season Schedule (PDF Preview)</p>
           </section>
 
           <section className="content-block">
@@ -125,9 +125,9 @@ export default function IPL2026Schedule() {
           <section className="download-hub">
              <div className="toss-card">
                 <h3>📥 Download IPL 2026 PDF</h3>
-                <p>Carry the full fixtures list on your phone. Offline access to all 74 matches.</p>
+                <p>Carry the full fixtures list on your phone. Official BCCI release for the 2026 season.</p>
                 <div style={{marginTop: '20px'}}>
-                   <a href="#" className="download-btn-premium">DOWNLOAD SCHEDULE PDF</a>
+                   <a href="https://scores.iplt20.com/TATA%20IPL%202026%20Season%20Schedule.pdf" target="_blank" className="download-btn-premium">DOWNLOAD OFFICIAL PDF</a>
                 </div>
              </div>
           </section>
