@@ -65,7 +65,16 @@ export default function AuctionSetup() {
             >
               <div className="fc-bg" style={{ background: `linear-gradient(135deg, ${team.color}22, ${team.color}00)` }}></div>
               <div className="fc-logo-box" style={{ background: team.color }}>
-                 <span style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>{team.name}</span>
+                 <img 
+                   src={`/teams/${team.name.toLowerCase()}.png`} 
+                   alt={team.name} 
+                   style={{ width: '50px', height: '50px', objectFit: 'contain', filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.2))' }} 
+                   onError={(e) => {
+                     e.target.style.display = 'none';
+                     e.target.nextSibling.style.display = 'block';
+                   }}
+                 />
+                 <span style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', display: 'none' }}>{team.name}</span>
               </div>
               <h3>{team.name}</h3>
               <p>Budget: ₹100.0 Cr</p>
