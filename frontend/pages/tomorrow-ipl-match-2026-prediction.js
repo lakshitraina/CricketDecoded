@@ -34,6 +34,18 @@ export default function TomorrowMatchPrediction() {
 
       <main className="match-hub-page">
         
+        {/* LEFT SIDEBAR AD (Skyscraper) */}
+        <div className="sidebar-ad left-sidebar">
+           <iframe src="//www.highperformanceformat.com/watchnew?key=aa6201d5fae0926236c836b46e69f60c" width="160" height="600" frameBorder="0" scrolling="no" title="ad-left"></iframe>
+        </div>
+
+        {/* RIGHT SIDEBAR AD (Skyscraper) */}
+        <div className="sidebar-ad right-sidebar">
+           <iframe src="//www.highperformanceformat.com/watchnew?key=7aca24a89379703b4856af696dd093ec" width="160" height="300" frameBorder="0" scrolling="no" title="ad-right"></iframe>
+           <div style={{marginTop: '20px'}}></div>
+           <iframe src="//www.profitablecpmratenetwork.com/watchnew?key=7b63b4b297c7e53c1d003813c9724a13" width="160" height="160" frameBorder="0" scrolling="no" title="ad-right-small"></iframe>
+        </div>
+
         <article className="hub-container">
           
           {/* USER REQUESTED MATCH CARD (MODERN VERSION) */}
@@ -206,6 +218,28 @@ export default function TomorrowMatchPrediction() {
           max-width: 850px;
           margin: 0 auto;
           padding: 85px 20px 100px; /* 85px top covers Navbar + Ticker space */
+          position: relative;
+        }
+
+        /* SIDEBAR ADS */
+        .sidebar-ad {
+           position: fixed;
+           top: 100px;
+           width: 160px;
+           z-index: 50;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+        }
+        .left-sidebar { 
+           left: calc(50% - 630px); 
+        }
+        .right-sidebar { 
+           right: calc(50% - 630px); 
+        }
+
+        @media (max-width: 1260px) {
+           .sidebar-ad { display: none; }
         }
         
         .match-hub-card {
