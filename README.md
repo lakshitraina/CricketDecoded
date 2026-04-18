@@ -67,4 +67,4 @@ The application will be running at `http://localhost:3000`.
 
 ---
 *Built with precision for cricket enthusiasts.*
-By Lakshit Raina ❤️
+By Lakshit Raina ❤️ in India.
